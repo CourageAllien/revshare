@@ -12,6 +12,8 @@ interface ButtonProps {
   href?: string;
   className?: string;
   pulse?: boolean;
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
 }
 
 export default function Button({
@@ -23,6 +25,8 @@ export default function Button({
   href,
   className = "",
   pulse = false,
+  type = "button",
+  disabled = false,
 }: ButtonProps) {
   const baseStyles =
     "inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 gap-2 relative overflow-hidden";
@@ -72,10 +76,12 @@ export default function Button({
 
   return (
     <motion.button
+      type={type}
       onClick={onClick}
-      className={`${classes} group`}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      disabled={disabled}
+      className={`${classes} group ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+      whileHover={disabled ? {} : { scale: 1.02 }}
+      whileTap={disabled ? {} : { scale: 0.98 }}
     >
       {content}
     </motion.button>
