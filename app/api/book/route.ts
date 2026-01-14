@@ -9,8 +9,8 @@ import { ZOOM_MEETING, generateGoogleCalendarUrl } from "@/lib/constants";
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER || "couragealison1@gmail.com",
-    pass: process.env.EMAIL_PASSWORD,
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASSWORD,
   },
 });
 
@@ -85,8 +85,17 @@ export async function POST(request: NextRequest) {
     try {
       const companyName = research?.companyName || "your company";
       
+      // Check if email credentials are configured
+      if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+        console.error("Email credentials not configured. EMAIL_USER:", !!process.env.EMAIL_USER, "EMAIL_APP_PASSWORD:", !!process.env.EMAIL_APP_PASSWORD);
+        throw new Error("Email credentials not configured");
+      }
+      
+      console.log("Attempting to send confirmation email to:", email);
+      console.log("From:", process.env.EMAIL_USER);
+      
       await transporter.sendMail({
-        from: `"RevShare" <${process.env.EMAIL_USER || "couragealison1@gmail.com"}>`,
+        from: `"RevShare" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: `You're confirmed! Strategy call on ${formattedDate} + Your Custom Playbook`,
         html: generateConfirmationEmail(name, formattedDate, time, companyName, calendarUrl, personalizedHook),
@@ -99,10 +108,12 @@ export async function POST(request: NextRequest) {
         ] : undefined,
       });
 
+      console.log("Confirmation email sent to:", email);
+
       // Also send notification to your email
       await transporter.sendMail({
-        from: `"RevShare Bookings" <${process.env.EMAIL_USER || "couragealison1@gmail.com"}>`,
-        to: process.env.EMAIL_USER || "couragealison1@gmail.com",
+        from: `"RevShare Bookings" <${process.env.EMAIL_USER}>`,
+        to: process.env.EMAIL_USER,
         subject: `New Booking: ${name} from ${companyName}`,
         html: generateAdminNotificationEmail(name, email, website, dealSize, currentChallenge, formattedDate, time, research),
         attachments: playbook ? [
@@ -114,9 +125,10 @@ export async function POST(request: NextRequest) {
         ] : undefined,
       });
 
-      console.log("Confirmation emails sent successfully");
+      console.log("Admin notification email sent successfully");
     } catch (emailError) {
       console.error("Error sending confirmation email:", emailError);
+      console.error("Email error details:", JSON.stringify(emailError, Object.getOwnPropertyNames(emailError)));
       // Don't fail the booking if email fails
     }
 
