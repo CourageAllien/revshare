@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
 
 export interface Booking {
   id: string;
@@ -20,28 +20,36 @@ export interface Booking {
 
 const BOOKINGS_KEY = "bookings";
 
-// Check if we're in development (no KV available)
-const isDev = process.env.NODE_ENV === "development" && !process.env.KV_REST_API_URL;
+// Check if we're in development without Redis configured
+const isDev = process.env.NODE_ENV === "development" && !process.env.UPSTASH_REDIS_REST_URL;
 
 // In-memory fallback for development
 let devBookings: Booking[] = [];
 
+// Initialize Redis client (only if env vars are available)
+const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    })
+  : null;
+
 export async function getBookings(): Promise<Booking[]> {
-  if (isDev) {
+  if (isDev || !redis) {
     return devBookings;
   }
   
   try {
-    const bookings = await kv.get<Booking[]>(BOOKINGS_KEY);
+    const bookings = await redis.get<Booking[]>(BOOKINGS_KEY);
     return bookings || [];
   } catch (error) {
-    console.error("Error getting bookings from KV:", error);
+    console.error("Error getting bookings from Redis:", error);
     return [];
   }
 }
 
 export async function addBooking(booking: Booking): Promise<void> {
-  if (isDev) {
+  if (isDev || !redis) {
     devBookings.push(booking);
     console.log("Dev: Added booking", booking);
     return;
@@ -50,15 +58,15 @@ export async function addBooking(booking: Booking): Promise<void> {
   try {
     const bookings = await getBookings();
     bookings.push(booking);
-    await kv.set(BOOKINGS_KEY, bookings);
+    await redis.set(BOOKINGS_KEY, bookings);
   } catch (error) {
-    console.error("Error adding booking to KV:", error);
+    console.error("Error adding booking to Redis:", error);
     throw error;
   }
 }
 
 export async function updateBooking(id: string, updates: Partial<Booking>): Promise<void> {
-  if (isDev) {
+  if (isDev || !redis) {
     const index = devBookings.findIndex(b => b.id === id);
     if (index !== -1) {
       devBookings[index] = { ...devBookings[index], ...updates };
@@ -71,10 +79,10 @@ export async function updateBooking(id: string, updates: Partial<Booking>): Prom
     const index = bookings.findIndex(b => b.id === id);
     if (index !== -1) {
       bookings[index] = { ...bookings[index], ...updates };
-      await kv.set(BOOKINGS_KEY, bookings);
+      await redis.set(BOOKINGS_KEY, bookings);
     }
   } catch (error) {
-    console.error("Error updating booking in KV:", error);
+    console.error("Error updating booking in Redis:", error);
     throw error;
   }
 }

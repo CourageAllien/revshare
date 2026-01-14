@@ -46,16 +46,18 @@ The booking system sends emails through Gmail. You need to create an App Passwor
 
 ---
 
-## Step 3: Set Up Vercel KV (Storage)
+## Step 3: Set Up Upstash Redis (Storage)
 
-The booking system stores appointments in Vercel KV:
+The booking system stores appointments in Upstash Redis:
 
 1. In your Vercel dashboard, go to your project
 2. Click **Storage** tab
-3. Click **Create Database** → **KV**
-4. Name it "revshare-bookings"
-5. Click **Create**
-6. The environment variables will be automatically added to your project
+3. Click **Upstash** from the Marketplace
+4. Click **Create Database**
+5. Select **Redis** and name it "revshare-bookings"
+6. Choose the free tier and your preferred region
+7. Click **Create**
+8. The environment variables (`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`) will be automatically added to your project
 
 ---
 
@@ -119,9 +121,9 @@ For local development, create a `.env.local` file:
 EMAIL_USER=couragealison1@gmail.com
 EMAIL_PASSWORD=your-app-password
 
-# Optional: Vercel KV (for local testing with production storage)
-# KV_REST_API_URL=your-kv-url
-# KV_REST_API_TOKEN=your-kv-token
+# Optional: Upstash Redis (for local testing with production storage)
+# UPSTASH_REDIS_REST_URL=your-upstash-url
+# UPSTASH_REDIS_REST_TOKEN=your-upstash-token
 ```
 
 Run the development server:
@@ -170,8 +172,8 @@ npm run dev
 
 ### Bookings not persisting
 
-1. Make sure Vercel KV is set up
-2. Check that KV environment variables are added
+1. Make sure Upstash Redis is set up
+2. Check that `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are added
 3. Redeploy after adding variables
 
 ---
