@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Gift } from "lucide-react";
+import { X, Gift, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import Button from "./ui/Button";
 
 export default function ExitIntent() {
   const [isVisible, setIsVisible] = useState(false);
   const [hasShown, setHasShown] = useState(false);
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [companyName, setCompanyName] = useState("");
 
   useEffect(() => {
     const handleMouseLeave = (e: MouseEvent) => {
@@ -23,6 +28,37 @@ export default function ExitIntent() {
 
   const handleClose = () => {
     setIsVisible(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/lead-magnet", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Something went wrong");
+        setIsLoading(false);
+        return;
+      }
+
+      setSuccess(true);
+      setCompanyName(data.companyName || "your company");
+    } catch (err) {
+      setError("Failed to send. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -56,35 +92,84 @@ export default function ExitIntent() {
               </button>
 
               {/* Content */}
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
-                  <Gift className="w-8 h-8 text-primary" />
-                </div>
+              {success ? (
+                <div className="text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle2 className="w-8 h-8 text-accent" />
+                  </div>
 
-                <h3 className="text-2xl font-bold text-white mb-3">
-                  Wait—before you go
-                </h3>
+                  <h3 className="text-2xl font-bold text-white mb-3">
+                    Check your inbox! 📬
+                  </h3>
 
-                <p className="text-text-secondary mb-6 leading-relaxed">
-                  Not ready for a call yet? No problem. Get our free guide on the
-                  <span className="text-white font-medium"> 5 signs your offer is ready for cold email</span>.
-                </p>
+                  <p className="text-text-secondary mb-6 leading-relaxed">
+                    Your personalized guide for <span className="text-white font-medium">{companyName}</span> is 
+                    on its way. We&apos;ve analyzed your business and created custom insights just for you.
+                  </p>
 
-                <div className="space-y-3">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="w-full px-4 py-3 bg-background border border-border rounded-xl text-white placeholder:text-text-muted focus:outline-none focus:border-primary/50 transition-colors"
-                  />
-                  <Button className="w-full" showArrow>
-                    Send Me the Guide
+                  <Button onClick={handleClose} className="w-full">
+                    Got it!
                   </Button>
                 </div>
+              ) : (
+                <div className="text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
+                    <Gift className="w-8 h-8 text-primary" />
+                  </div>
 
-                <p className="text-text-muted text-sm mt-4">
-                  No spam, ever. Unsubscribe anytime.
-                </p>
-              </div>
+                  <h3 className="text-2xl font-bold text-white mb-3">
+                    Wait—before you go
+                  </h3>
+
+                  <p className="text-text-secondary mb-6 leading-relaxed">
+                    Not ready for a call yet? No problem. Get a <span className="text-white font-medium">personalized guide</span> on the
+                    <span className="text-primary font-medium"> 5 signs your offer is ready for cold email</span>—tailored 
+                    specifically to your business.
+                  </p>
+
+                  <form onSubmit={handleSubmit} className="space-y-3">
+                    <div>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          setError("");
+                        }}
+                        placeholder="Enter your work email"
+                        required
+                        disabled={isLoading}
+                        className="w-full px-4 py-3 bg-background border border-border rounded-xl text-white placeholder:text-text-muted focus:outline-none focus:border-primary/50 transition-colors disabled:opacity-50"
+                      />
+                      {error && (
+                        <div className="flex items-center gap-2 mt-2 text-left">
+                          <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                          <p className="text-red-400 text-sm">{error}</p>
+                        </div>
+                      )}
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      showArrow 
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Personalizing your guide...
+                        </span>
+                      ) : (
+                        "Send Me the Guide"
+                      )}
+                    </Button>
+                  </form>
+
+                  <p className="text-text-muted text-xs mt-4">
+                    🏢 Company email required • No spam, ever
+                  </p>
+                </div>
+              )}
             </div>
           </motion.div>
         </>
