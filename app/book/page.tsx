@@ -100,8 +100,9 @@ export default function BookingPage() {
       });
 
       if (response.ok) {
-        // Redirect to confirmation page
-        window.location.href = `/book/confirmed?name=${encodeURIComponent(formData.name)}&date=${encodeURIComponent(format(selectedDate!, "EEEE, MMMM d, yyyy"))}&time=${encodeURIComponent(selectedTime!)}`;
+        const data = await response.json();
+        // Redirect to confirmation page with calendar URL
+        window.location.href = `/book/confirmed?name=${encodeURIComponent(formData.name)}&date=${encodeURIComponent(format(selectedDate!, "EEEE, MMMM d, yyyy"))}&time=${encodeURIComponent(selectedTime!)}&calendarUrl=${encodeURIComponent(data.calendarUrl || '')}`;
       } else {
         alert("Something went wrong. Please try again.");
       }
@@ -209,7 +210,7 @@ export default function BookingPage() {
                     </div>
                     <div>
                       <h2 className="text-xl font-semibold text-white">Select a Date & Time</h2>
-                      <p className="text-text-muted text-sm">15 min | Video call</p>
+                      <p className="text-text-muted text-sm">15 min | Zoom meeting</p>
                     </div>
                   </div>
 
@@ -217,32 +218,32 @@ export default function BookingPage() {
                   <div className="mb-6">
                     <h3 className="text-white font-medium mb-3">Select a date</h3>
                     <div className="grid grid-cols-7 gap-2">
-                      {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                        <div key={day} className="text-center text-text-muted text-xs py-2">
-                          {day}
-                        </div>
-                      ))}
                       {days.map((day, index) => {
                         const isDisabled = isWeekend(day);
                         const isSelected = selectedDate && isSameDay(day, selectedDate);
+                        const dayName = format(day, "EEE");
                         
                         return (
-                          <button
-                            key={index}
-                            onClick={() => handleDateSelect(day)}
-                            disabled={isDisabled}
-                            className={`
-                              py-3 rounded-lg text-sm font-medium transition-all
-                              ${isDisabled 
-                                ? "text-text-muted/50 cursor-not-allowed" 
-                                : isSelected
-                                  ? "bg-primary text-white"
-                                  : "bg-background border border-border text-white hover:border-primary/50"
-                              }
-                            `}
-                          >
-                            {format(day, "d")}
-                          </button>
+                          <div key={index} className="flex flex-col items-center">
+                            <div className="text-text-muted text-xs py-1 mb-1">
+                              {dayName}
+                            </div>
+                            <button
+                              onClick={() => handleDateSelect(day)}
+                              disabled={isDisabled}
+                              className={`
+                                w-full py-3 rounded-lg text-sm font-medium transition-all
+                                ${isDisabled 
+                                  ? "text-text-muted/50 cursor-not-allowed bg-transparent" 
+                                  : isSelected
+                                    ? "bg-primary text-white"
+                                    : "bg-background border border-border text-white hover:border-primary/50"
+                                }
+                              `}
+                            >
+                              {format(day, "d")}
+                            </button>
+                          </div>
                         );
                       })}
                     </div>

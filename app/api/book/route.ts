@@ -3,6 +3,7 @@ import nodemailer from "nodemailer";
 import { format, parseISO } from "date-fns";
 import { addBooking, getBookings, Booking } from "@/lib/storage";
 import { researchCompanyAndGenerateContent } from "@/lib/claude";
+import { ZOOM_MEETING, generateGoogleCalendarUrl } from "@/lib/constants";
 
 // Email configuration - uses environment variables
 const transporter = nodemailer.createTransport({
@@ -72,6 +73,14 @@ export async function POST(request: NextRequest) {
     // Save booking to persistent storage
     await addBooking(booking);
 
+    // Generate calendar URL before sending emails
+    const calendarUrl = generateGoogleCalendarUrl(
+      "RevShare Strategy Call",
+      date,
+      time,
+      15
+    );
+
     // Send confirmation email with playbook
     try {
       const companyName = research?.companyName || "your company";
@@ -80,7 +89,7 @@ export async function POST(request: NextRequest) {
         from: `"RevShare" <${process.env.EMAIL_USER || "couragealison1@gmail.com"}>`,
         to: email,
         subject: `You're confirmed! Strategy call on ${formattedDate} + Your Custom Playbook`,
-        html: generateConfirmationEmail(name, formattedDate, time, companyName, personalizedHook),
+        html: generateConfirmationEmail(name, formattedDate, time, companyName, calendarUrl, personalizedHook),
         attachments: playbook ? [
           {
             filename: `RevShare_Playbook_${companyName.replace(/\s+/g, '_')}.html`,
@@ -119,6 +128,7 @@ export async function POST(request: NextRequest) {
         time,
         companyName: research?.companyName,
       },
+      calendarUrl,
     });
   } catch (error) {
     console.error("Booking error:", error);
@@ -134,6 +144,7 @@ function generateConfirmationEmail(
   date: string,
   time: string,
   companyName: string,
+  calendarUrl: string,
   personalizedHook?: string
 ): string {
   const firstName = name.split(" ")[0];
@@ -214,6 +225,44 @@ function generateConfirmationEmail(
                     </td>
                   </tr>
                 </table>
+              </div>
+              
+              <!-- Zoom Meeting Details -->
+              <div style="background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                <h3 style="color: #3b82f6; font-size: 16px; margin: 0 0 16px 0;">🎥 Zoom Meeting</h3>
+                
+                <p style="color: #a1a1aa; font-size: 14px; margin: 0 0 12px 0;">
+                  <strong style="color: #ffffff;">Join Link:</strong><br>
+                  <a href="${ZOOM_MEETING.link}" style="color: #3b82f6; word-break: break-all;">${ZOOM_MEETING.link}</a>
+                </p>
+                
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding: 4px 0;">
+                      <span style="color: #71717a; font-size: 14px;">Meeting ID:</span>
+                      <span style="color: #ffffff; font-size: 14px; font-family: monospace; margin-left: 8px;">${ZOOM_MEETING.meetingId}</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 4px 0;">
+                      <span style="color: #71717a; font-size: 14px;">Passcode:</span>
+                      <span style="color: #ffffff; font-size: 14px; font-family: monospace; margin-left: 8px;">${ZOOM_MEETING.passcode}</span>
+                    </td>
+                  </tr>
+                </table>
+                
+                <div style="margin-top: 16px;">
+                  <a href="${ZOOM_MEETING.link}" style="display: inline-block; background-color: #3b82f6; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
+                    Join Zoom Meeting
+                  </a>
+                </div>
+              </div>
+              
+              <!-- Add to Calendar -->
+              <div style="text-align: center; margin-bottom: 24px;">
+                <a href="${calendarUrl}" style="display: inline-block; background-color: #0a0a0a; border: 1px solid #27272a; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 14px;">
+                  📅 Add to Google Calendar
+                </a>
               </div>
               
               <!-- Playbook Callout -->

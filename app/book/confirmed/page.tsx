@@ -3,14 +3,25 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { CheckCircle2, Calendar, Clock, Video, ArrowRight, Mail } from "lucide-react";
+import { CheckCircle2, Calendar, Clock, Video, ArrowRight, Mail, ExternalLink, Copy } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { ZOOM_MEETING } from "@/lib/constants";
 
 function ConfirmationContent() {
   const searchParams = useSearchParams();
   const name = searchParams.get("name") || "there";
   const date = searchParams.get("date") || "your scheduled date";
   const time = searchParams.get("time") || "your scheduled time";
+  const calendarUrl = searchParams.get("calendarUrl") || "";
+  
+  const [copied, setCopied] = useState(false);
+
+  const copyZoomLink = () => {
+    navigator.clipboard.writeText(ZOOM_MEETING.link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -36,7 +47,7 @@ function ConfirmationContent() {
           </p>
 
           {/* Booking Details Card */}
-          <div className="bg-card border border-border rounded-2xl p-6 mb-8 text-left">
+          <div className="bg-card border border-border rounded-2xl p-6 mb-6 text-left">
             <h2 className="text-white font-semibold mb-4">Booking Details</h2>
             
             <div className="space-y-4">
@@ -66,19 +77,88 @@ function ConfirmationContent() {
                 </div>
                 <div>
                   <div className="text-text-muted text-sm">Meeting Type</div>
-                  <div className="text-white font-medium">15-min Video Call</div>
+                  <div className="text-white font-medium">15-min Zoom Meeting</div>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Zoom Meeting Card */}
+          <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 mb-6 text-left">
+            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+              <Video className="w-5 h-5 text-primary" />
+              Zoom Meeting Details
+            </h3>
+            
+            <div className="space-y-3">
+              <div>
+                <div className="text-text-muted text-sm mb-1">Meeting Link</div>
+                <div className="flex items-center gap-2">
+                  <a 
+                    href={ZOOM_MEETING.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline text-sm break-all flex-1"
+                  >
+                    {ZOOM_MEETING.link}
+                  </a>
+                  <button
+                    onClick={copyZoomLink}
+                    className="p-2 rounded-lg bg-background border border-border hover:border-primary/50 transition-colors"
+                    title="Copy link"
+                  >
+                    {copied ? (
+                      <CheckCircle2 className="w-4 h-4 text-accent" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-text-muted" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex gap-6">
+                <div>
+                  <div className="text-text-muted text-sm">Meeting ID</div>
+                  <div className="text-white font-mono">{ZOOM_MEETING.meetingId}</div>
+                </div>
+                <div>
+                  <div className="text-text-muted text-sm">Passcode</div>
+                  <div className="text-white font-mono">{ZOOM_MEETING.passcode}</div>
+                </div>
+              </div>
+            </div>
+
+            <a
+              href={ZOOM_MEETING.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 w-full py-3 bg-primary hover:bg-primary-hover text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              Join Zoom Meeting
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          </div>
+
+          {/* Add to Calendar */}
+          {calendarUrl && (
+            <a
+              href={decodeURIComponent(calendarUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mb-6 w-full py-3 bg-card border border-border hover:border-primary/50 text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              <Calendar className="w-5 h-5 text-primary" />
+              Add to Google Calendar
+            </a>
+          )}
+
           {/* Email Notice */}
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-8">
+          <div className="bg-card border border-border rounded-xl p-4 mb-6">
             <div className="flex items-center gap-3">
               <Mail className="w-5 h-5 text-primary flex-shrink-0" />
               <p className="text-text-secondary text-sm text-left">
-                A confirmation email has been sent to your inbox with the meeting 
-                link and calendar invite. Check your spam folder if you don&apos;t see it.
+                A confirmation email has been sent to your inbox with all the meeting 
+                details. Check your spam folder if you don&apos;t see it.
               </p>
             </div>
           </div>
