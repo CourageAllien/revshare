@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "@upstash/redis": "^1.36.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^11.3.8",

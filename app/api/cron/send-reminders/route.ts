@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { getBookings, updateBooking, Booking } from "@/lib/storage";
-import {
-  getOneDayReminderEmail,
-  getTwoHourReminderEmail,
-  getThirtyMinReminderEmail,
-} from "@/lib/email-templates";
+import { generatePersonalizedReminderEmail } from "@/lib/claude";
 import { parseISO, differenceInHours, differenceInMinutes, format } from "date-fns";
 
 // Email configuration
@@ -44,25 +40,27 @@ async function sendReminderEmail(
   type: "one-day" | "two-hours" | "thirty-min"
 ): Promise<boolean> {
   try {
-    const emailData = {
-      name: booking.name,
-      email: booking.email,
-      company: booking.company,
-      date: format(parseISO(booking.date), "EEEE, MMMM d, yyyy"),
-      time: booking.time,
-    };
-
-    let emailContent;
-    switch (type) {
-      case "one-day":
-        emailContent = getOneDayReminderEmail(emailData);
-        break;
-      case "two-hours":
-        emailContent = getTwoHourReminderEmail(emailData);
-        break;
-      case "thirty-min":
-        emailContent = getThirtyMinReminderEmail(emailData);
-        break;
+    const formattedDate = format(parseISO(booking.date), "EEEE, MMMM d, yyyy");
+    
+    let emailContent: { subject: string; html: string };
+    
+    // If we have AI research, generate personalized email
+    if (booking.research && booking.personalizedHook) {
+      try {
+        emailContent = await generatePersonalizedReminderEmail(
+          type,
+          booking.name,
+          formattedDate,
+          booking.time,
+          booking.research,
+          booking.personalizedHook
+        );
+      } catch (aiError) {
+        console.error("AI email generation failed, using fallback:", aiError);
+        emailContent = getFallbackReminderEmail(type, booking.name, formattedDate, booking.time);
+      }
+    } else {
+      emailContent = getFallbackReminderEmail(type, booking.name, formattedDate, booking.time);
     }
 
     await transporter.sendMail({
@@ -78,6 +76,86 @@ async function sendReminderEmail(
     console.error(`Error sending ${type} reminder:`, error);
     return false;
   }
+}
+
+function getFallbackReminderEmail(
+  type: "one-day" | "two-hours" | "thirty-min",
+  name: string,
+  date: string,
+  time: string
+): { subject: string; html: string } {
+  const firstName = name.split(" ")[0];
+  
+  const content = {
+    "one-day": {
+      subject: `Tomorrow: Your strategy call with RevShare`,
+      body: `Hey ${firstName}! 👋<br><br>Just a friendly reminder that we have our strategy call scheduled for <strong>tomorrow at ${time}</strong>.<br><br>I've been reviewing your business and I'm genuinely excited to chat. Come prepared to share a bit about your offer and ideal clients – the more specific you can be, the more valuable our conversation will be.<br><br>Talk soon!<br><br>– The RevShare Team`,
+    },
+    "two-hours": {
+      subject: `In 2 hours: Strategy call with RevShare`,
+      body: `Hey ${firstName}!<br><br>Our call is coming up at <strong>${time}</strong>. Quick checklist:<br><br>✓ Quiet space with good internet<br>✓ Know your average deal size<br>✓ Have 1-2 case studies in mind<br>✓ Ready to describe your ideal client<br><br>Remember: this isn't a sales pitch. We're here to honestly assess if cold email makes sense for your business.<br><br>See you soon! 🚀`,
+    },
+    "thirty-min": {
+      subject: `Starting in 30 mins! 🚀`,
+      body: `Hey ${firstName}!<br><br>We're about to connect in <strong>30 minutes</strong> at ${time}.<br><br>Get ready to dive into your pipeline strategy! The meeting link should be in your calendar. If not, just reply to this email.<br><br>Let's make this call count. 💪`,
+    },
+  };
+
+  const emailData = content[type];
+  
+  return {
+    subject: emailData.subject,
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #050505; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #050505; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px;">
+          <tr>
+            <td style="padding-bottom: 30px;">
+              <span style="font-size: 24px; font-weight: bold; color: #ffffff;">REV<span style="color: #3b82f6;">SHARE</span></span>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #111113; border-radius: 16px; padding: 40px; border: 1px solid #27272a;">
+              <p style="color: #a1a1aa; font-size: 16px; line-height: 1.8; margin: 0;">
+                ${emailData.body}
+              </p>
+              <div style="background-color: #0a0a0a; border-radius: 12px; padding: 20px; margin-top: 24px;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="color: #71717a; font-size: 14px; padding: 8px 0;">Date:</td>
+                    <td style="color: #ffffff; font-size: 14px; padding: 8px 0; text-align: right;">${date}</td>
+                  </tr>
+                  <tr>
+                    <td style="color: #71717a; font-size: 14px; padding: 8px 0;">Time:</td>
+                    <td style="color: #ffffff; font-size: 14px; padding: 8px 0; text-align: right;">${time} (EST)</td>
+                  </tr>
+                </table>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding-top: 30px; text-align: center;">
+              <p style="color: #71717a; font-size: 14px; margin: 0;">
+                Questions? Just reply to this email.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `,
+  };
 }
 
 export async function GET(request: NextRequest) {
@@ -102,6 +180,9 @@ export async function GET(request: NextRequest) {
       const meetingTime = getMeetingDateTime(booking);
       const hoursUntilMeeting = differenceInHours(meetingTime, now);
       const minutesUntilMeeting = differenceInMinutes(meetingTime, now);
+
+      // Skip past meetings
+      if (minutesUntilMeeting < 0) continue;
 
       results.processed++;
 

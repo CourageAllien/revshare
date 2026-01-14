@@ -70,6 +70,7 @@ In Vercel, go to **Settings** → **Environment Variables** and add:
 | `EMAIL_USER` | `couragealison1@gmail.com` | Your Gmail address |
 | `EMAIL_PASSWORD` | `your-app-password` | The 16-char App Password from Step 1 |
 | `CRON_SECRET` | `your-secret-string` | A random string to secure the cron endpoint |
+| `CLAUDE_API_KEY` | `sk-ant-api03-...` | Your Anthropic Claude API key for AI features |
 
 **Generate a secure CRON_SECRET:**
 ```bash
@@ -120,6 +121,9 @@ For local development, create a `.env.local` file:
 # Gmail Configuration
 EMAIL_USER=couragealison1@gmail.com
 EMAIL_PASSWORD=your-app-password
+
+# Claude API for AI-powered features
+CLAUDE_API_KEY=your-claude-api-key
 
 # Optional: Upstash Redis (for local testing with production storage)
 # UPSTASH_REDIS_REST_URL=your-upstash-url

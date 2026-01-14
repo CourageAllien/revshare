@@ -1,16 +1,22 @@
 import { Redis } from "@upstash/redis";
 
+import { CompanyResearch } from "./claude";
+
 export interface Booking {
   id: string;
   name: string;
   email: string;
-  company: string;
   website: string;
   dealSize: string;
   currentChallenge: string;
   date: string; // ISO string
   time: string; // e.g., "10:00 AM"
   createdAt: string;
+  // AI-generated content
+  research?: CompanyResearch;
+  personalizedHook?: string;
+  valueProposition?: string;
+  playbook?: string; // HTML playbook
   // Reminder tracking
   confirmationSent: boolean;
   oneDayReminderSent: boolean;

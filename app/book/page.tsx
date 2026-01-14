@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { 
   Calendar, 
   Clock, 
-  CheckCircle2, 
   ArrowRight, 
   Sparkles,
   Users,
@@ -13,7 +12,7 @@ import {
   Zap
 } from "lucide-react";
 import Link from "next/link";
-import { format, addDays, startOfWeek, isSameDay, isWeekend, isBefore, startOfDay } from "date-fns";
+import { format, addDays, isSameDay, isWeekend, startOfDay } from "date-fns";
 
 const benefits = [
   {
@@ -55,7 +54,6 @@ export default function BookingPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    company: "",
     website: "",
     dealSize: "",
     currentChallenge: "",
@@ -167,6 +165,23 @@ export default function BookingPage() {
                     <span className="text-text-secondary">{benefit.text}</span>
                   </motion.div>
                 ))}
+              </div>
+
+              {/* Bonus */}
+              <div className="p-6 bg-accent/5 border border-accent/20 rounded-xl mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-accent text-lg">🎁</span>
+                  </div>
+                  <div>
+                    <h4 className="text-white font-semibold mb-1">Custom Playbook Included</h4>
+                    <p className="text-text-secondary text-sm">
+                      After booking, our AI will research your company and create a personalized 
+                      outbound playbook with target audience insights and 5 sample cold emails 
+                      tailored to your business.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Social proof */}
@@ -335,21 +350,6 @@ export default function BookingPage() {
 
                     <div>
                       <label className="block text-white text-sm font-medium mb-2">
-                        Company Name *
-                      </label>
-                      <input
-                        type="text"
-                        name="company"
-                        required
-                        value={formData.company}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 bg-background border border-border rounded-xl text-white placeholder:text-text-muted focus:outline-none focus:border-primary/50 transition-colors"
-                        placeholder="Acme Consulting"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-white text-sm font-medium mb-2">
                         Company Website *
                       </label>
                       <input
@@ -359,8 +359,11 @@ export default function BookingPage() {
                         value={formData.website}
                         onChange={handleInputChange}
                         className="w-full px-4 py-3 bg-background border border-border rounded-xl text-white placeholder:text-text-muted focus:outline-none focus:border-primary/50 transition-colors"
-                        placeholder="https://acmeconsulting.com"
+                        placeholder="https://yourcompany.com"
                       />
+                      <p className="text-text-muted text-xs mt-1">
+                        We&apos;ll use this to research your business and create your custom playbook
+                      </p>
                     </div>
 
                     <div>
@@ -375,25 +378,29 @@ export default function BookingPage() {
                         className="w-full px-4 py-3 bg-background border border-border rounded-xl text-white focus:outline-none focus:border-primary/50 transition-colors"
                       >
                         <option value="">Select deal size</option>
-                        <option value="10k-25k">$10k - $25k</option>
-                        <option value="25k-50k">$25k - $50k</option>
-                        <option value="50k-100k">$50k - $100k</option>
-                        <option value="100k+">$100k+</option>
+                        <option value="$10k - $25k">$10k - $25k</option>
+                        <option value="$25k - $50k">$25k - $50k</option>
+                        <option value="$50k - $100k">$50k - $100k</option>
+                        <option value="$100k+">$100k+</option>
                       </select>
                     </div>
 
                     <div>
                       <label className="block text-white text-sm font-medium mb-2">
-                        What&apos;s your biggest challenge with lead generation right now?
+                        What&apos;s your biggest challenge with lead generation right now? *
                       </label>
                       <textarea
                         name="currentChallenge"
                         rows={3}
+                        required
                         value={formData.currentChallenge}
                         onChange={handleInputChange}
                         className="w-full px-4 py-3 bg-background border border-border rounded-xl text-white placeholder:text-text-muted focus:outline-none focus:border-primary/50 transition-colors resize-none"
-                        placeholder="Tell us about your current situation..."
+                        placeholder="E.g., I'm spending too much time on outreach with little results, I don't know how to write cold emails that convert, etc."
                       />
+                      <p className="text-text-muted text-xs mt-1">
+                        This helps us tailor your custom playbook and sample emails
+                      </p>
                     </div>
 
                     <button
@@ -402,10 +409,10 @@ export default function BookingPage() {
                       className="w-full py-4 bg-primary hover:bg-primary-hover text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? (
-                        "Scheduling..."
+                        "Creating your playbook..."
                       ) : (
                         <>
-                          Confirm Booking
+                          Confirm Booking & Get Playbook
                           <ArrowRight className="w-4 h-4" />
                         </>
                       )}
