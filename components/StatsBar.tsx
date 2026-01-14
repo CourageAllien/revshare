@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import AnimatedCounter from "./ui/AnimatedCounter";
 
 const stats = [
-  { value: 340, prefix: "", suffix: "+", label: "Meetings Booked" },
-  { value: 89, prefix: "", suffix: "%", label: "Show Rate" },
+  { value: 136, prefix: "", suffix: "+", label: "Meetings Booked" },
+  { value: 88, prefix: "", suffix: "%", label: "Show Rate" },
   { value: 6, prefix: "", suffix: " days", label: "To First Meeting" },
 ];
 
