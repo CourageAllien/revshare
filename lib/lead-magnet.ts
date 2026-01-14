@@ -250,7 +250,7 @@ export function generateLeadMagnetEmailHTML(content: LeadMagnetContent): string 
                 <p style="color: rgba(255,255,255,0.9); font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
                   ${content.callToAction}
                 </p>
-                <a href="https://revshare.vercel.app/book" style="display: inline-block; background-color: #ffffff; color: #3b82f6; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
+                <a href="https://revshare-mu.vercel.app/book" style="display: inline-block; background-color: #ffffff; color: #3b82f6; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
                   Book Your Strategy Call →
                 </a>
               </div>
