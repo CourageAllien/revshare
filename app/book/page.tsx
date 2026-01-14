@@ -167,37 +167,20 @@ export default function BookingPage() {
                 ))}
               </div>
 
-              {/* Bonus */}
-              <div className="p-6 bg-accent/5 border border-accent/20 rounded-xl mb-6">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-accent text-lg">🎁</span>
-                  </div>
-                  <div>
-                    <h4 className="text-white font-semibold mb-1">Custom Playbook Included</h4>
-                    <p className="text-text-secondary text-sm">
-                      After booking, our AI will research your company and create a personalized 
-                      outbound playbook with target audience insights and 5 sample cold emails 
-                      tailored to your business.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
               {/* Social proof */}
               <div className="p-6 bg-card border border-border rounded-xl">
                 <p className="text-text-secondary italic mb-4">
-                  &quot;The call was genuinely helpful. No pressure, just straight talk about 
-                  whether this would work for my business. Two weeks later, we had our 
-                  first meetings booked.&quot;
+                  &quot;They took over our entire outreach operation. Within the first month, 
+                  we had 12 qualified meetings booked. The ROI has been incredible—we closed 
+                  two enterprise deals directly from their pipeline.&quot;
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-                    <span className="text-primary font-bold text-sm">EA</span>
+                    <span className="text-primary font-bold text-sm">SO</span>
                   </div>
                   <div>
-                    <div className="text-white font-medium text-sm">Eunice Alison</div>
-                    <div className="text-text-muted text-xs">Co-founder, Zizi</div>
+                    <div className="text-white font-medium text-sm">Seun Ojo</div>
+                    <div className="text-text-muted text-xs">CEO, Zortcloud</div>
                   </div>
                 </div>
               </div>
