@@ -5,26 +5,25 @@ import {
   extractDomain,
   generateLeadMagnetContent,
   generateLeadMagnetEmailHTML,
+  getTodaysLeadMagnet,
 } from "@/lib/lead-magnet";
 
-// Email configuration
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER || "couragealison1@gmail.com",
-    pass: process.env.EMAIL_PASSWORD,
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_APP_PASSWORD,
   },
 });
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email } = body;
+    const { email } = await request.json();
 
-    // Validate email exists
-    if (!email || !email.includes("@")) {
+    // Validate email is provided
+    if (!email || typeof email !== "string") {
       return NextResponse.json(
-        { error: "Please enter a valid email address" },
+        { error: "Email is required" },
         { status: 400 }
       );
     }
@@ -32,10 +31,7 @@ export async function POST(request: NextRequest) {
     // Check if it's a personal email
     if (isPersonalEmail(email)) {
       return NextResponse.json(
-        { 
-          error: "Please use your company email address. Personal emails (Gmail, Yahoo, etc.) are not accepted.",
-          isPersonalEmail: true 
-        },
+        { error: "Please use your company email address to receive personalized insights." },
         { status: 400 }
       );
     }
@@ -44,58 +40,37 @@ export async function POST(request: NextRequest) {
     const domain = extractDomain(email);
     if (!domain) {
       return NextResponse.json(
-        { error: "Invalid email domain" },
+        { error: "Invalid email format" },
         { status: 400 }
       );
     }
 
-    console.log(`Generating lead magnet for: ${email} (domain: ${domain})`);
+    // Get today's topic for the response
+    const todaysTopic = getTodaysLeadMagnet();
 
-    // Generate personalized content using AI
+    // Generate personalized content with Claude
     const content = await generateLeadMagnetContent(email, domain);
-    
-    console.log(`Generated content for: ${content.companyName}`);
 
     // Generate email HTML
-    const emailHTML = generateLeadMagnetEmailHTML(content);
+    const emailHtml = generateLeadMagnetEmailHTML(content);
 
     // Send the email
     await transporter.sendMail({
-      from: `"RevShare" <${process.env.EMAIL_USER || "couragealison1@gmail.com"}>`,
+      from: `"RevShare" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: `🎯 5 Signs ${content.companyName} is Ready for Cold Email`,
-      html: emailHTML,
+      subject: `${content.emoji} ${content.title} - Personalized for ${content.companyName}`,
+      html: emailHtml,
     });
-
-    // Also notify yourself
-    await transporter.sendMail({
-      from: `"RevShare Leads" <${process.env.EMAIL_USER || "couragealison1@gmail.com"}>`,
-      to: process.env.EMAIL_USER || "couragealison1@gmail.com",
-      subject: `New Lead Magnet Download: ${email}`,
-      html: `
-        <div style="font-family: sans-serif; padding: 20px;">
-          <h2>New Lead Magnet Download</h2>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Company:</strong> ${content.companyName}</p>
-          <p><strong>Domain:</strong> ${domain}</p>
-          <p><strong>Description:</strong> ${content.companyDescription}</p>
-          <hr>
-          <p>They received a personalized "5 Signs" guide. Follow up!</p>
-        </div>
-      `,
-    });
-
-    console.log(`Lead magnet sent to: ${email}`);
 
     return NextResponse.json({
       success: true,
-      message: "Guide sent successfully!",
       companyName: content.companyName,
+      topicTitle: todaysTopic.title,
     });
   } catch (error) {
     console.error("Lead magnet error:", error);
     return NextResponse.json(
-      { error: "Failed to send guide. Please try again." },
+      { error: "Failed to generate and send your guide. Please try again." },
       { status: 500 }
     );
   }

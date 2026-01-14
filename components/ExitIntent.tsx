@@ -5,6 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Gift, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import Button from "./ui/Button";
 
+interface TodaysTopic {
+  id: string;
+  title: string;
+  emoji: string;
+}
+
 export default function ExitIntent() {
   const [isVisible, setIsVisible] = useState(false);
   const [hasShown, setHasShown] = useState(false);
@@ -13,6 +19,22 @@ export default function ExitIntent() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [companyName, setCompanyName] = useState("");
+  const [todaysTopic, setTodaysTopic] = useState<TodaysTopic | null>(null);
+
+  // Fetch today's topic on mount
+  useEffect(() => {
+    fetch("/api/todays-topic")
+      .then((res) => res.json())
+      .then((data) => setTodaysTopic(data))
+      .catch(() => {
+        // Fallback topic
+        setTodaysTopic({
+          id: "5-signs-ready",
+          title: "5 Signs Your Offer is Ready for Cold Email",
+          emoji: "🎯",
+        });
+      });
+  }, []);
 
   useEffect(() => {
     const handleMouseLeave = (e: MouseEvent) => {
@@ -114,17 +136,19 @@ export default function ExitIntent() {
               ) : (
                 <div className="text-center">
                   <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
-                    <Gift className="w-8 h-8 text-primary" />
+                    <span className="text-3xl">{todaysTopic?.emoji || "🎁"}</span>
                   </div>
 
                   <h3 className="text-2xl font-bold text-white mb-3">
                     Wait—before you go
                   </h3>
 
-                  <p className="text-text-secondary mb-6 leading-relaxed">
-                    Not ready for a call yet? No problem. Get a <span className="text-white font-medium">personalized guide</span> on the
-                    <span className="text-primary font-medium"> 5 signs your offer is ready for cold email</span>—tailored 
-                    specifically to your business.
+                  <p className="text-text-secondary mb-2 leading-relaxed">
+                    Not ready for a call yet? No problem. Get our free guide:
+                  </p>
+                  
+                  <p className="text-primary font-semibold text-lg mb-6">
+                    {todaysTopic?.title || "Loading..."}
                   </p>
 
                   <form onSubmit={handleSubmit} className="space-y-3">
@@ -166,7 +190,7 @@ export default function ExitIntent() {
                   </form>
 
                   <p className="text-text-muted text-xs mt-4">
-                    🏢 Company email required • No spam, ever
+                    🏢 Company email required • Personalized with AI
                   </p>
                 </div>
               )}

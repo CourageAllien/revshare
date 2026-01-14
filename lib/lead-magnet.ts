@@ -27,6 +27,60 @@ const PERSONAL_EMAIL_DOMAINS = [
   "hey.com",
 ];
 
+// Rotating lead magnet topics - cycles through based on day of year
+const LEAD_MAGNET_TOPICS = [
+  {
+    id: "5-signs-ready",
+    title: "5 Signs Your Offer is Ready for Cold Email",
+    emoji: "🎯",
+    prompt: "5 signs that indicate a B2B offer is ready for cold email outreach",
+  },
+  {
+    id: "domains-burned",
+    title: "Why Your Email Domains Are Burned (And How to Fix It)",
+    emoji: "🔥",
+    prompt: "reasons why email domains get burned/blacklisted and how to prevent and fix it",
+  },
+  {
+    id: "multi-channel",
+    title: "10 Signs You Need Multi-Channel Outreach",
+    emoji: "📡",
+    prompt: "10 signs that indicate a business needs to use multi-channel outreach (email, LinkedIn, calls) instead of just one channel",
+  },
+  {
+    id: "cold-email-mistakes",
+    title: "7 Cold Email Mistakes Killing Your Reply Rates",
+    emoji: "💀",
+    prompt: "7 common cold email mistakes that kill reply rates and how to fix them",
+  },
+  {
+    id: "icp-wrong",
+    title: "Your ICP is Wrong: 5 Signs You're Targeting the Wrong People",
+    emoji: "🎪",
+    prompt: "5 signs that indicate a business is targeting the wrong ideal customer profile (ICP) in their outreach",
+  },
+  {
+    id: "outbound-timing",
+    title: "The Perfect Time to Start Outbound (It's Not When You Think)",
+    emoji: "⏰",
+    prompt: "when is the right time for a B2B business to start outbound sales and what conditions need to be met",
+  },
+  {
+    id: "agency-vs-inhouse",
+    title: "Agency vs In-House Sales: Which is Right for You?",
+    emoji: "⚖️",
+    prompt: "pros and cons of hiring an agency vs building in-house sales team for B2B outbound",
+  },
+];
+
+export function getTodaysLeadMagnet(): typeof LEAD_MAGNET_TOPICS[0] {
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const index = dayOfYear % LEAD_MAGNET_TOPICS.length;
+  return LEAD_MAGNET_TOPICS[index];
+}
+
 export function isPersonalEmail(email: string): boolean {
   const domain = email.split("@")[1]?.toLowerCase();
   if (!domain) return true;
@@ -41,15 +95,12 @@ export function extractDomain(email: string): string {
 export interface LeadMagnetContent {
   companyName: string;
   companyDescription: string;
-  fiveSigns: Array<{
-    sign: string;
-    explanation: string;
-    howItApplies: string;
-  }>;
-  giftIdeas: Array<{
-    title: string;
-    description: string;
-    whyItHelps: string;
+  title: string;
+  emoji: string;
+  sections: Array<{
+    heading: string;
+    content: string;
+    personalizedTip: string;
   }>;
   personalizedIntro: string;
   callToAction: string;
@@ -60,81 +111,56 @@ export async function generateLeadMagnetContent(
   domain: string
 ): Promise<LeadMagnetContent> {
   const websiteUrl = `https://${domain}`;
+  const todaysTopic = getTodaysLeadMagnet();
   
   const prompt = `You are an expert B2B sales strategist for RevShare, a company that handles the entire sales process (outreach, meeting prep, follow-ups) for B2B consultants and takes 15-30% of lifetime client revenue.
 
 Someone just submitted their email to get a free guide. Their email is: ${email}
 Their company domain is: ${domain} (website: ${websiteUrl})
 
-Based on the domain, infer what this company likely does. Then create personalized content for them.
+TODAY'S TOPIC: ${todaysTopic.title}
+TOPIC FOCUS: ${todaysTopic.prompt}
+
+Based on the domain, infer what this company likely does. Then create personalized content about TODAY'S TOPIC specifically for them.
 
 Respond in this exact JSON format:
 {
   "companyName": "inferred company name from domain",
   "companyDescription": "brief description of what they likely do based on the domain",
-  "fiveSigns": [
+  "title": "${todaysTopic.title}",
+  "emoji": "${todaysTopic.emoji}",
+  "sections": [
     {
-      "sign": "Sign #1 title",
-      "explanation": "What this sign means in general",
-      "howItApplies": "How this specifically applies to their business based on what they do"
+      "heading": "Section 1 heading related to the topic",
+      "content": "2-3 sentences explaining this point",
+      "personalizedTip": "How this specifically applies to their business based on what they do"
     },
     {
-      "sign": "Sign #2 title",
-      "explanation": "explanation",
-      "howItApplies": "personalized application"
+      "heading": "Section 2 heading",
+      "content": "explanation",
+      "personalizedTip": "personalized application"
     },
     {
-      "sign": "Sign #3 title",
-      "explanation": "explanation",
-      "howItApplies": "personalized application"
+      "heading": "Section 3 heading",
+      "content": "explanation",
+      "personalizedTip": "personalized application"
     },
     {
-      "sign": "Sign #4 title",
-      "explanation": "explanation",
-      "howItApplies": "personalized application"
+      "heading": "Section 4 heading",
+      "content": "explanation",
+      "personalizedTip": "personalized application"
     },
     {
-      "sign": "Sign #5 title",
-      "explanation": "explanation",
-      "howItApplies": "personalized application"
+      "heading": "Section 5 heading",
+      "content": "explanation",
+      "personalizedTip": "personalized application"
     }
   ],
-  "giftIdeas": [
-    {
-      "title": "Gift idea 1 title",
-      "description": "What this gift/resource is",
-      "whyItHelps": "Why this would help them specifically"
-    },
-    {
-      "title": "Gift idea 2 title",
-      "description": "description",
-      "whyItHelps": "why it helps"
-    },
-    {
-      "title": "Gift idea 3 title",
-      "description": "description",
-      "whyItHelps": "why it helps"
-    }
-  ],
-  "personalizedIntro": "A warm, personalized opening paragraph mentioning their company and what they do",
-  "callToAction": "A compelling call-to-action for them to book a call with RevShare, mentioning how we could specifically help their type of business"
+  "personalizedIntro": "A warm, personalized opening paragraph mentioning their company, what they do, and why this topic matters for them specifically",
+  "callToAction": "A compelling call-to-action for them to book a call with RevShare, connecting today's topic to how we could specifically help their type of business"
 }
 
-The 5 signs should be:
-1. Your offer is proven (you have case studies/results)
-2. Your deal size is $10k+ (makes outbound profitable)
-3. You're capacity-constrained (too busy delivering to do sales)
-4. You have a clear ICP (know exactly who you help)
-5. You're ready to scale (want consistent pipeline)
-
-Make each sign specific to their business based on what you infer from their domain.
-
-The gift ideas should be things RevShare could offer them that would be valuable, such as:
-- Custom ICP analysis
-- Sample cold email sequences for their niche
-- Competitive outreach audit
-- Target account list sample
-- Outbound strategy session`;
+Make each section specific and actionable. The personalized tips should reference their specific business/industry.`;
 
   try {
     const message = await anthropic.messages.create({
@@ -187,9 +213,9 @@ export function generateLeadMagnetEmailHTML(content: LeadMagnetContent): string 
             <td style="background-color: #111113; border-radius: 16px; padding: 40px; border: 1px solid #27272a;">
               <!-- Header -->
               <div style="text-align: center; margin-bottom: 30px;">
-                <div style="font-size: 48px; margin-bottom: 16px;">🎯</div>
-                <h1 style="color: #ffffff; font-size: 28px; margin: 0 0 8px 0;">
-                  5 Signs Your Offer is Ready for Cold Email
+                <div style="font-size: 48px; margin-bottom: 16px;">${content.emoji}</div>
+                <h1 style="color: #ffffff; font-size: 26px; margin: 0 0 8px 0; line-height: 1.3;">
+                  ${content.title}
                 </h1>
                 <p style="color: #3b82f6; font-size: 16px; margin: 0;">
                   Personalized for ${content.companyName}
@@ -201,39 +227,17 @@ export function generateLeadMagnetEmailHTML(content: LeadMagnetContent): string 
                 ${content.personalizedIntro}
               </p>
               
-              <!-- The 5 Signs -->
-              ${content.fiveSigns.map((sign, index) => `
+              <!-- Sections -->
+              ${content.sections.map((section, index) => `
               <div style="background-color: #0a0a0a; border-radius: 12px; padding: 20px; margin-bottom: 16px; border-left: 4px solid #3b82f6;">
-                <h3 style="color: #ffffff; font-size: 18px; margin: 0 0 8px 0;">
-                  ${index + 1}. ${sign.sign}
+                <h3 style="color: #ffffff; font-size: 18px; margin: 0 0 10px 0;">
+                  ${index + 1}. ${section.heading}
                 </h3>
                 <p style="color: #a1a1aa; font-size: 14px; line-height: 1.6; margin: 0 0 12px 0;">
-                  ${sign.explanation}
+                  ${section.content}
                 </p>
                 <p style="color: #3b82f6; font-size: 14px; line-height: 1.6; margin: 0; font-style: italic;">
-                  💡 For ${content.companyName}: ${sign.howItApplies}
-                </p>
-              </div>
-              `).join('')}
-              
-              <!-- Divider -->
-              <div style="border-top: 1px solid #27272a; margin: 30px 0;"></div>
-              
-              <!-- Bonus Gift Ideas -->
-              <h2 style="color: #ffffff; font-size: 20px; margin: 0 0 16px 0;">
-                🎁 Bonus: What We Could Build for ${content.companyName}
-              </h2>
-              
-              ${content.giftIdeas.map(gift => `
-              <div style="background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
-                <h4 style="color: #ffffff; font-size: 16px; margin: 0 0 8px 0;">
-                  ${gift.title}
-                </h4>
-                <p style="color: #a1a1aa; font-size: 14px; line-height: 1.5; margin: 0 0 8px 0;">
-                  ${gift.description}
-                </p>
-                <p style="color: #10b981; font-size: 13px; margin: 0;">
-                  ✓ ${gift.whyItHelps}
+                  💡 For ${content.companyName}: ${section.personalizedTip}
                 </p>
               </div>
               `).join('')}
@@ -241,7 +245,7 @@ export function generateLeadMagnetEmailHTML(content: LeadMagnetContent): string 
               <!-- CTA -->
               <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 12px; padding: 24px; margin-top: 30px; text-align: center;">
                 <h3 style="color: #ffffff; font-size: 20px; margin: 0 0 12px 0;">
-                  Ready to Fill Your Pipeline?
+                  Want Help Implementing This?
                 </h3>
                 <p style="color: rgba(255,255,255,0.9); font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
                   ${content.callToAction}
