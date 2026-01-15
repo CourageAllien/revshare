@@ -105,17 +105,22 @@ export async function generatePlaybookPDF(
   y -= 35;
   
   // Title
-  page.drawText("Custom Outbound Playbook", { x: margin, y, size: 20, font: helveticaBold, color: black });
+  page.drawText("Outbound Strategy Guide", { x: margin, y, size: 20, font: helveticaBold, color: black });
   y -= 25;
-  page.drawText(`Prepared for ${research.companyName}`, { x: margin, y, size: 12, font: helvetica, color: gray });
-  y -= 40;
+  page.drawText("How to Reach Your Ideal Clients", { x: margin, y, size: 12, font: helvetica, color: gray });
+  y -= 30;
+  
+  // Intro text
+  addText("This guide breaks down exactly who your best prospects are, what signals indicate they're ready to buy, and gives you 5 ready-to-use cold email templates. Use these to start conversations with decision-makers who need what you offer.", 10, helvetica, gray);
+  y -= 25;
   
   // Overview Box
+  const whatTheySell = (research as { whatTheySell?: string }).whatTheySell || research.companyDescription;
   page.drawRectangle({
     x: margin,
-    y: y - 80,
+    y: y - 65,
     width: pageWidth - margin * 2,
-    height: 85,
+    height: 70,
     color: rgb(0.96, 0.97, 0.98),
     borderColor: rgb(0.9, 0.9, 0.9),
     borderWidth: 1,
@@ -124,54 +129,61 @@ export async function generatePlaybookPDF(
   y -= 15;
   page.drawText(`Company: ${research.companyName}`, { x: margin + 10, y, size: 10, font: helvetica, color: black });
   y -= 15;
-  page.drawText(`Website: ${website}`, { x: margin + 10, y, size: 10, font: helvetica, color: black });
+  page.drawText(`What You Sell: ${whatTheySell.substring(0, 70)}${whatTheySell.length > 70 ? '...' : ''}`, { x: margin + 10, y, size: 10, font: helvetica, color: black });
   y -= 15;
   page.drawText(`Average Deal Size: ${dealSize}`, { x: margin + 10, y, size: 10, font: helvetica, color: black });
-  y -= 15;
-  page.drawText(`Challenge: ${challenge.substring(0, 80)}${challenge.length > 80 ? '...' : ''}`, { x: margin + 10, y, size: 10, font: helvetica, color: black });
   y -= 35;
   
-  // Description
-  addText(research.companyDescription, 11, helvetica, gray);
+  // Pain Points Your Prospects Face
+  addSection("Pain Points Your Prospects Face");
+  addText("These are the problems your ideal clients are dealing with. Lead with these in your outreach:", 9, helvetica, gray);
   y -= 10;
-  
-  // Target Audience Pain Points
-  addSection("Target Audience Pain Points");
   for (const point of research.targetAudience.painPoints.slice(0, 5)) {
     addBullet(point);
   }
   
-  // Target Market Characteristics  
-  addSection("Target Market Characteristics");
+  // Who to Target
+  addSection("Who to Target");
+  addText("Focus your outreach on companies and decision-makers with these characteristics:", 9, helvetica, gray);
+  y -= 10;
   for (const char of research.targetAudience.characteristics.slice(0, 4)) {
     addBullet(char);
   }
   
   // Technographic Signals
   addSection("Technographic Signals");
+  addText("When you see these technical indicators, the company is likely a good fit:", 9, helvetica, gray);
+  y -= 10;
   for (const signal of research.technographicSignals.slice(0, 4)) {
     addBullet(signal);
   }
   
-  // Behavioral Indicators
-  addSection("Behavioral Indicators");
+  // Buying Intent Signals
+  addSection("Buying Intent Signals");
+  addText("These behaviors suggest a company is actively looking for a solution like yours:", 9, helvetica, gray);
+  y -= 10;
   for (const indicator of research.behavioralIndicators.slice(0, 4)) {
     addBullet(indicator);
   }
   
-  // Sample Emails
-  addSection("Sample Cold Emails");
+  // Cold Email Templates
+  addSection("5 Cold Email Templates");
+  addText("These emails are ready for you to customize and send. Each uses a different proven angle:", 9, helvetica, gray);
+  y -= 10;
+  
+  const green = rgb(0.086, 0.529, 0.243);
   
   for (let i = 0; i < Math.min(research.sampleEmails.length, 5); i++) {
     const email = research.sampleEmails[i];
+    const whyItWorks = (email as { whyItWorks?: string }).whyItWorks;
     
-    if (y < margin + 150) {
+    if (y < margin + 180) {
       page = pdfDoc.addPage([pageWidth, pageHeight]);
       y = pageHeight - margin;
     }
     
     y -= 10;
-    page.drawText(`Email ${i + 1}: ${email.angle}`, { x: margin, y, size: 11, font: helveticaBold, color: black });
+    page.drawText(`Template ${i + 1}: ${email.angle}`, { x: margin, y, size: 11, font: helveticaBold, color: black });
     y -= 18;
     page.drawText(`Subject: ${email.subject}`, { x: margin, y, size: 10, font: helveticaBold, color: gray });
     y -= 18;
@@ -213,17 +225,30 @@ export async function generatePlaybookPDF(
       }
     }
     
+    // Add "Why it works" explanation if available
+    if (whyItWorks) {
+      y -= 5;
+      if (y < margin + 50) {
+        page = pdfDoc.addPage([pageWidth, pageHeight]);
+        y = pageHeight - margin;
+      }
+      page.drawText("Why it works: ", { x: margin + 10, y, size: 8, font: helveticaBold, color: green });
+      const whyText = whyItWorks.substring(0, 100) + (whyItWorks.length > 100 ? '...' : '');
+      page.drawText(whyText, { x: margin + 75, y, size: 8, font: helvetica, color: green });
+      y -= 12;
+    }
+    
     y -= 15;
   }
   
   // Footer on last page
   y -= 30;
   if (y > margin + 50) {
-    page.drawText("Ready to Launch?", { x: margin, y, size: 14, font: helveticaBold, color: blue });
+    page.drawText("Let's Build Your Outbound Engine", { x: margin, y, size: 14, font: helveticaBold, color: blue });
     y -= 20;
-    addText("This playbook is just the beginning. On our call, we'll dive deeper into your specific market and build a complete outbound strategy.", 10, helvetica, gray);
+    addText("On our call, we'll go deeper into your specific market, refine these messages, and map out a complete outbound strategy. We handle the execution - you focus on closing.", 10, helvetica, gray);
     y -= 15;
-    page.drawText("Remember: We only get paid when you get paid.", { x: margin, y, size: 10, font: helveticaBold, color: black });
+    page.drawText("No upfront costs. We only win when you win.", { x: margin, y, size: 10, font: helveticaBold, color: black });
   }
   
   const pdfBytes = await pdfDoc.save();

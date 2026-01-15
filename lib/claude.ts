@@ -7,6 +7,7 @@ const anthropic = new Anthropic({
 export interface CompanyResearch {
   companyName: string;
   companyDescription: string;
+  whatTheySell: string;
   targetAudience: {
     painPoints: string[];
     characteristics: string[];
@@ -17,6 +18,7 @@ export interface CompanyResearch {
     subject: string;
     body: string;
     angle: string;
+    whyItWorks: string;
   }>;
 }
 
@@ -24,7 +26,7 @@ export interface PersonalizedContent {
   research: CompanyResearch;
   personalizedHook: string;
   valueProposition: string;
-  playbook: string; // HTML formatted playbook
+  playbook: string; // HTML formatted doc
 }
 
 export async function researchCompanyAndGenerateContent(
@@ -32,71 +34,96 @@ export async function researchCompanyAndGenerateContent(
   dealSize: string,
   challenge: string
 ): Promise<PersonalizedContent> {
-  const prompt = `You are an expert B2B sales strategist and cold email copywriter. A potential client has booked a call with RevShare, a company that handles the entire sales process (outreach, meeting prep, follow-ups) for B2B consultants and takes 15-30% of lifetime client revenue.
+  const prompt = `You are an expert B2B cold email strategist and copywriter. You're creating an EDUCATIONAL document for a client who has booked a call. This document should teach them how to sell THEIR product/service to THEIR target market.
 
-Here's what we know about them:
+The client's details:
 - Company Website: ${website}
 - Average Deal Size: ${dealSize}
-- Their Biggest Lead Generation Challenge: ${challenge}
+- Their Lead Generation Challenge: ${challenge}
 
-Based on the website URL, infer what the company likely does. Then provide a comprehensive analysis.
+IMPORTANT: You are NOT selling to this client. You are TEACHING them how to write cold emails to sell their own product/service. The sample emails should be emails THEY would send to THEIR prospects.
+
+Based on the website URL, research what the company does and who their ideal customers are. Then create a document that teaches them how to target their market.
 
 Respond in this exact JSON format:
 {
   "companyName": "inferred company name from website",
-  "companyDescription": "brief description of what the company does based on the website domain",
+  "companyDescription": "what this company does based on the domain",
+  "whatTheySell": "the specific product or service they offer",
   "targetAudience": {
-    "painPoints": ["pain point 1", "pain point 2", "pain point 3", "pain point 4", "pain point 5"],
-    "characteristics": ["characteristic 1", "characteristic 2", "characteristic 3", "characteristic 4"]
+    "painPoints": ["5 specific pain points their ideal customers face that the client's service solves"],
+    "characteristics": ["4 key characteristics of companies that would buy from them"]
   },
-  "technographicSignals": ["signal 1", "signal 2", "signal 3", "signal 4"],
-  "behavioralIndicators": ["indicator 1", "indicator 2", "indicator 3", "indicator 4"],
+  "technographicSignals": ["4 technical indicators that a company needs their service"],
+  "behavioralIndicators": ["4 actions/behaviors that signal buying intent for their service"],
   "sampleEmails": [
     {
-      "subject": "short 2-3 word subject",
-      "body": "full email body following the GEX template style - personalized, conversational, under 100 words",
-      "angle": "what angle this email uses (e.g., Problem Sniffing, Case Study, Creative Ideas)"
+      "subject": "2-5 word attention-grabbing subject line",
+      "body": "Email the CLIENT can send to THEIR prospects. Under 100 words. Specific pain point + how client's service solves it + social proof if possible + soft CTA.",
+      "angle": "name of the approach used",
+      "whyItWorks": "brief explanation of why this email is effective"
     },
-    {
-      "subject": "subject 2",
-      "body": "email 2 body",
-      "angle": "angle 2"
-    },
-    {
-      "subject": "subject 3", 
-      "body": "email 3 body",
-      "angle": "angle 3"
-    },
-    {
-      "subject": "subject 4",
-      "body": "email 4 body", 
-      "angle": "angle 4"
-    },
-    {
-      "subject": "subject 5",
-      "body": "email 5 body",
-      "angle": "angle 5"
-    }
+    ... 4 more emails with different angles
   ],
-  "personalizedHook": "A compelling one-liner about how RevShare can specifically help THIS company based on their challenge",
-  "valueProposition": "2-3 sentences explaining specifically how RevShare's model would benefit them given their deal size and challenges"
+  "personalizedHook": "A compelling one-liner about their specific challenge we noticed",
+  "valueProposition": "How RevShare's outbound partnership model specifically addresses their stated challenge"
 }
 
-For the sample emails, follow these principles from Growth Engine X:
-- Keep emails under 100 words
-- Lead with research/relevance ("I saw...", "I noticed...")
-- Use a conversational, non-salesy tone
-- Include a soft CTA
-- Reference their specific industry/niche
-- Use pattern interrupts
-- Make each email use a different angle:
-  1. Standard Template with AI personalization
-  2. Josh Braun "Poke the Bear" style
-  3. Lead Magnet / Value-first approach
-  4. Creative Ideas Campaign
-  5. Short and Direct (2-sentence style)
+CRITICAL EMAIL GUIDELINES - Study these examples and write emails of similar quality:
 
-The emails should be written as if RevShare is reaching out to THEIR ideal clients (the companies they want to sell their services to).`;
+EXAMPLE 1 - Pain Point Lead:
+Subject: 40% qualified leads lost
+That's probably the last thing you want to hear, Sarah.
+But, for TechCorp it happens way too often. And that's usually as a result of disconnected sales and marketing systems.
+We make it easy for companies in such situations to increase lead conversion by 65%. TechFlow saw similar issues and increased qualified leads by 73% within 60 days.
+Think this can help?
+
+EXAMPLE 2 - Research + Observation:
+Hey Sarah,
+Your team spends half their day researching and finding AI companies similar to Discord instead of focusing on closing deals and building strategic partnerships.
+We help them focus on selling while our AI-automated workflows handle the prospect research and build lists based on signals that show companies are struggling with LLM implementation at scale.
+Mind if I share a sample well-researched prospect list?
+
+EXAMPLE 3 - Social Proof Angle:
+Hey Sarah – Looks like you work with AI infrastructure platforms. Saw that Discord is a client.
+Usually this suggests you'll be open to working with other AI product companies building similar applications.
+Companies without large GTM teams plug our AI-automated workflows to handle research, outreach and scale pipeline generation. 100 personalized conversations = qualified meetings on autopilot.
+Think this can help you get clients similar to Discord?
+
+EXAMPLE 4 - Deep Research:
+Sarah – from my research these are some of the issues your target market faces that Adaline helps with:
+• Difficulty managing prompts and evaluating LLM performance at scale
+• Challenges bridging the gap between technical and nontechnical teams
+• Struggles with maintaining reliability and uptime in production AI workflows
+We have AI-automated workflows that can identify companies struggling with these exact issues and message them on your behalf with relevant case studies.
+Is this a bad idea or am I way off mark here?
+
+EXAMPLE 5 - Show Competence:
+Sarah – I sent an email a while back that probably didn't do a good enough job showing you how we could help.
+Our system combines AI-powered research and automation so your team can see qualified accounts in front of them instead of manually researching.
+For example:
+• Your platform processes 5B+ tokens per day with 99.998% uptime
+• Discord and Epsilon are listed as key clients
+• You're targeting product and engineering teams
+Besides insights like this, we also monitor for news, job positions, tech stack changes.
+Wanna make it happen?
+
+KEY PRINCIPLES FOR THE SAMPLE EMAILS:
+1. Each email targets the CLIENT'S ideal customer (not the client themselves)
+2. Lead with research/relevance - show you understand the prospect's world
+3. Quantify pain points when possible (40% lost, 3 hours per day, etc.)
+4. Include social proof with specific results (73% increase, 60 days, etc.)
+5. Use soft CTAs: "Think this can help?", "Open to hearing more?", "Mind if I share?"
+6. Conversational tone - like a helpful peer, not a salesperson
+7. Keep under 100 words - respect their time
+8. Position the client as a partner who "gets it", not a vendor
+
+The 5 email angles to use:
+1. Pain Point + Quantified Impact (e.g., "40% leads lost")
+2. Research + Observation (show you did homework on the prospect)  
+3. Social Proof + Similar Company (leverage existing client success)
+4. Deep Research Bullet Points (list specific pain points you identified)
+5. Competence Demonstration (show specific insights you found about them)`;
 
   try {
     const message = await anthropic.messages.create({
@@ -201,6 +228,18 @@ function generatePlaybookHTML(
     .section {
       margin-bottom: 30px;
     }
+    .intro-box {
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border-left: 4px solid #3b82f6;
+      padding: 24px;
+      margin: 20px 0;
+      border-radius: 0 12px 12px 0;
+    }
+    .intro-box p {
+      margin: 0;
+      color: #1e40af;
+      font-size: 16px;
+    }
     .overview-box {
       background: #f8fafc;
       border-left: 4px solid #3b82f6;
@@ -228,8 +267,8 @@ function generatePlaybookHTML(
       background: #f8fafc;
       border: 1px solid #e5e5e5;
       border-radius: 12px;
-      padding: 20px;
-      margin: 20px 0;
+      padding: 24px;
+      margin: 24px 0;
     }
     .email-header {
       display: flex;
@@ -256,14 +295,38 @@ function generatePlaybookHTML(
       font-weight: 600;
       color: #1a1a1a;
       margin-bottom: 10px;
+      font-size: 15px;
     }
     .email-body {
       background: white;
-      padding: 15px;
+      padding: 20px;
       border-radius: 8px;
       border: 1px solid #e5e5e5;
       white-space: pre-wrap;
       font-size: 14px;
+      line-height: 1.7;
+    }
+    .why-works {
+      background: #f0fdf4;
+      border-left: 3px solid #22c55e;
+      padding: 12px 16px;
+      margin-top: 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 13px;
+      color: #166534;
+    }
+    .why-works strong {
+      color: #15803d;
+    }
+    .tip-box {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 24px 0;
+    }
+    .tip-box strong {
+      color: #b45309;
     }
     .cta-section {
       background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
@@ -294,34 +357,39 @@ function generatePlaybookHTML(
 <body>
   <div class="header">
     <div class="logo">REV<span>SHARE</span></div>
-    <h1>Custom Outbound Playbook</h1>
-    <p class="subtitle">Prepared exclusively for ${research.companyName}</p>
+    <h1>Outbound Strategy Guide</h1>
+    <p class="subtitle">How to Reach Your Ideal Clients</p>
   </div>
 
   <div class="section">
-    <h2>📋 Overview</h2>
+    <div class="intro-box">
+      <p>This guide breaks down exactly who your best prospects are, what signals indicate they're ready to buy, and gives you 5 ready-to-use cold email templates based on proven frameworks. Use these to start conversations with decision-makers who need what you offer.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📋 Your Business Snapshot</h2>
     <div class="overview-box">
       <p><strong>Company:</strong> ${research.companyName}</p>
-      <p><strong>Website:</strong> ${website}</p>
+      <p><strong>What You Sell:</strong> ${research.whatTheySell || research.companyDescription}</p>
       <p><strong>Average Deal Size:</strong> ${dealSize}</p>
-      <p><strong>Current Challenge:</strong> ${challenge}</p>
     </div>
-    <p>${research.companyDescription}</p>
-    <p><strong>${research.personalizedHook}</strong></p>
-    <p>${research.valueProposition}</p>
   </div>
 
   <div class="section">
-    <h2>🎯 Target Audience Pain Points</h2>
-    <p>These are the problems your ideal clients are experiencing that make them perfect prospects for your services:</p>
+    <h2>🎯 Pain Points Your Prospects Face</h2>
+    <p>These are the problems your ideal clients are dealing with right now. Lead with these in your outreach — they're why prospects will pay attention to your message:</p>
     <ul class="pain-points">
       ${research.targetAudience.painPoints.map(p => `<li>${p}</li>`).join("\n      ")}
     </ul>
+    <div class="tip-box">
+      <strong>💡 Pro tip:</strong> The best cold emails quantify these pain points. Instead of "you're losing leads", say "you're probably losing 40% of qualified leads." Specific numbers grab attention.
+    </div>
   </div>
 
   <div class="section">
-    <h2>👥 Target Market Characteristics</h2>
-    <p>Key attributes of companies and decision-makers you should be targeting:</p>
+    <h2>👥 Who to Target</h2>
+    <p>Focus your outreach on companies and decision-makers with these characteristics:</p>
     <ul class="characteristics">
       ${research.targetAudience.characteristics.map(c => `<li>${c}</li>`).join("\n      ")}
     </ul>
@@ -329,44 +397,45 @@ function generatePlaybookHTML(
 
   <div class="section">
     <h2>💻 Technographic Signals</h2>
-    <p>Technical indicators that suggest a company is ready for your services:</p>
+    <p>When you see these technical indicators, the company is likely a good fit:</p>
     <ul class="tech-signals">
       ${research.technographicSignals.map(t => `<li>${t}</li>`).join("\n      ")}
     </ul>
   </div>
 
   <div class="section">
-    <h2>📊 Behavioral Indicators</h2>
-    <p>Actions and behaviors that signal buying intent:</p>
+    <h2>📊 Buying Intent Signals</h2>
+    <p>These behaviors suggest a company is actively looking for a solution like yours:</p>
     <ul class="behavioral">
       ${research.behavioralIndicators.map(b => `<li>${b}</li>`).join("\n      ")}
     </ul>
   </div>
 
   <div class="section">
-    <h2>✉️ Sample Cold Emails</h2>
-    <p>Here are 5 proven email templates customized for your business, following the Growth Engine X methodology:</p>
+    <h2>✉️ 5 Cold Email Templates</h2>
+    <p>These emails are ready for you to customize and send. Each uses a different proven angle — test them to see which resonates most with your market.</p>
     
     ${research.sampleEmails.map((email, index) => `
     <div class="email-card">
       <div class="email-header">
-        <span class="email-number">Email ${index + 1}</span>
+        <span class="email-number">Template ${index + 1}</span>
         <span class="email-angle">${email.angle}</span>
       </div>
       <div class="email-subject">Subject: ${email.subject}</div>
       <div class="email-body">${email.body}</div>
+      ${email.whyItWorks ? `<div class="why-works"><strong>Why it works:</strong> ${email.whyItWorks}</div>` : ''}
     </div>
     `).join("\n    ")}
   </div>
 
   <div class="cta-section">
-    <h2>Ready to Launch?</h2>
-    <p>This playbook is just the beginning. On our call, we'll dive deeper into your specific market and build a complete outbound strategy tailored to ${research.companyName}.</p>
-    <p><strong>Remember: We only get paid when you get paid.</strong></p>
+    <h2>Let's Build Your Outbound Engine</h2>
+    <p>On our call, we'll go deeper into your specific market, refine these messages, and map out a complete outbound strategy. We handle the execution — you focus on closing.</p>
+    <p><strong>No upfront costs. We only win when you win.</strong></p>
   </div>
 
   <div class="footer">
-    <p>© ${new Date().getFullYear()} RevShare. This playbook was custom-generated for ${research.companyName}.</p>
+    <p>© ${new Date().getFullYear()} RevShare</p>
   </div>
 </body>
 </html>

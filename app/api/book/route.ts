@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Format date for display
     const formattedDate = format(parseISO(date), "EEEE, MMMM d, yyyy");
 
-    // Generate AI research and playbook
+    // Generate AI research and strategy doc
     let research, personalizedHook, valueProposition, playbook;
     try {
       console.log("Generating AI research for:", website);
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       15
     );
 
-    // Send confirmation email with playbook
+    // Send confirmation email with strategy doc
     const companyName = research?.companyName || "your company";
     
     // Check if email credentials are configured
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     } else {
       console.log("Attempting to send confirmation email to:", email);
       
-      // Try to generate PDF playbook (optional - don't block email if this fails)
+      // Try to generate PDF strategy doc (optional - don't block email if this fails)
       let pdfBuffer: Buffer | undefined;
       try {
         if (research && personalizedHook && valueProposition) {
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
             dealSize,
             currentChallenge
           );
-          console.log("PDF playbook generated successfully");
+          console.log("PDF strategy doc generated successfully");
         }
       } catch (pdfError) {
         console.error("Failed to generate PDF (continuing without attachment):", pdfError);
@@ -294,13 +294,13 @@ function generateConfirmationEmail(
                 </a>
               </div>
               
-              <!-- Playbook Callout -->
+              <!-- Strategy Doc Callout -->
               <div style="background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                <h3 style="color: #10b981; font-size: 16px; margin: 0 0 8px 0;">🎁 Custom Strategy Doc Attached</h3>
+                <h3 style="color: #10b981; font-size: 16px; margin: 0 0 8px 0;">🎁 Strategy Doc Attached</h3>
                 <p style="color: #a1a1aa; font-size: 14px; margin: 0; line-height: 1.6;">
-                  I've put together some insights for ${companyName} including target audience analysis 
-                  and <strong style="color: #ffffff;">5 sample cold emails</strong> tailored to your business. 
-                  Check the attached doc before our call.
+                  I've put together a guide on how to reach your ideal clients — including target audience insights 
+                  and <strong style="color: #ffffff;">5 cold email templates</strong> you can use. 
+                  Check out the attached doc before our call.
                 </p>
               </div>
               
@@ -308,7 +308,7 @@ function generateConfirmationEmail(
               <div style="border-top: 1px solid #27272a; padding-top: 24px;">
                 <h3 style="color: #ffffff; font-size: 16px; margin: 0 0 12px 0;">Before our call, have ready:</h3>
                 <ul style="color: #a1a1aa; font-size: 14px; line-height: 1.8; margin: 0; padding-left: 20px;">
-                  <li>Review your custom playbook (attached)</li>
+                  <li>Review the attached strategy doc</li>
                   <li>A clear idea of your ideal client profile</li>
                   <li>1-2 case studies or client results</li>
                   <li>Questions about how revenue-share works</li>
@@ -401,7 +401,7 @@ function generateAdminNotificationEmail(
   
   <div style="margin-top: 20px; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.2);">
     <p style="margin: 0; color: #3b82f6; font-size: 14px;">
-      📎 The custom playbook is attached. Review it before the call!
+      📎 The strategy doc is attached. Review it before the call!
     </p>
   </div>
 </div>

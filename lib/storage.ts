@@ -16,7 +16,7 @@ export interface Booking {
   research?: CompanyResearch;
   personalizedHook?: string;
   valueProposition?: string;
-  playbook?: string; // HTML playbook
+  playbook?: string; // HTML strategy doc
   // Reminder tracking
   confirmationSent: boolean;
   oneDayReminderSent: boolean;
