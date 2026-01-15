@@ -58,13 +58,15 @@ EXAMPLE TO CLARIFY:
 If the client is "ZortCloud" (a software development agency), their prospects might be "startups needing custom software" or "enterprises with legacy systems."
 The sample emails would be emails ZortCloud sends to those startups/enterprises - NOT emails someone sends to ZortCloud.
 
+IMPORTANT: This document is sent TO the client, so use second-person pronouns ("your", "you") when addressing the client in challengeAnalysis and challengeSolution. Speak directly to them.
+
 Respond in this exact JSON format:
 {
   "companyName": "name of the client's company",
   "companyDescription": "what the client's company does",
   "whatTheySell": "the specific service/product the client offers",
-  "challengeAnalysis": "2-3 sentences analyzing their stated challenge and why it's holding them back",
-  "challengeSolution": "2-3 sentences explaining how cold email outbound can solve this specific challenge",
+  "challengeAnalysis": "2-3 sentences addressing the client directly about their challenge using 'your' and 'you'. Example: 'Your list building challenge suggests you're struggling to...'",
+  "challengeSolution": "2-3 sentences explaining how cold outbound solves their challenge, using 'your' and 'you'. Example: 'By systematically reaching prospects who match your ideal customer profile...'",
   "targetAudience": {
     "painPoints": [
       "5 pain points that the CLIENT'S PROSPECTS face (not the client)",
@@ -377,10 +379,9 @@ function generatePlaybookHTML(
   </div>
 
   <div class="section">
-    <h2>🔥 Your Challenge</h2>
+    <h2>🔥 Your ${challenge.charAt(0).toUpperCase() + challenge.slice(1).toLowerCase()} Challenge</h2>
     <div class="overview-box" style="background: #fef2f2; border-left-color: #ef4444;">
-      <p style="color: #991b1b; font-weight: 600; margin-bottom: 12px;">"${challenge}"</p>
-      <p style="color: #7f1d1d;">${research.challengeAnalysis || "This is a common challenge that prevents many B2B companies from scaling predictably."}</p>
+      <p style="color: #7f1d1d;">${research.challengeAnalysis || "This challenge is holding you back from scaling predictably. Let's fix that."}</p>
     </div>
   </div>
 

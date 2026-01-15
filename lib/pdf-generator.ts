@@ -112,13 +112,13 @@ export async function generatePlaybookPDF(
   
   // Your Challenge Section
   const red = rgb(0.6, 0.11, 0.11);
-  const challengeAnalysis = (research as { challengeAnalysis?: string }).challengeAnalysis || "This is a common challenge that prevents many B2B companies from scaling predictably.";
-  const challengeSolution = (research as { challengeSolution?: string }).challengeSolution || "Cold email outbound, done right, puts you in front of decision-makers who need your service.";
+  const challengeAnalysis = (research as { challengeAnalysis?: string }).challengeAnalysis || "This challenge is holding you back from scaling predictably. Let's fix that.";
+  const challengeSolution = (research as { challengeSolution?: string }).challengeSolution || "Cold email outbound puts you in front of decision-makers who need your service — before they even know they're looking.";
   
-  addSection("Your Challenge");
-  page.drawText(`"${challenge.substring(0, 80)}${challenge.length > 80 ? '...' : ''}"`, { x: margin, y, size: 10, font: helveticaBold, color: red });
-  y -= 16;
-  addText(challengeAnalysis, 9, helvetica, gray);
+  // Capitalize first letter of challenge for title
+  const challengeTitle = challenge.charAt(0).toUpperCase() + challenge.slice(1).toLowerCase();
+  addSection(`Your ${challengeTitle} Challenge`);
+  addText(challengeAnalysis, 9, helvetica, red);
   y -= 15;
   
   // The Solution Section
