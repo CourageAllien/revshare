@@ -9,7 +9,8 @@ import {
   Sparkles,
   Users,
   Target,
-  Zap
+  Zap,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { format, addDays, isSameDay, isWeekend, startOfDay } from "date-fns";
@@ -115,6 +116,32 @@ export default function BookingPage() {
 
   return (
     <main className="min-h-screen bg-background">
+      {/* Full-page loading overlay */}
+      {isSubmitting && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex items-center justify-center"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="text-center"
+          >
+            <div className="relative mb-6">
+              <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin mx-auto" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">
+              Confirming your booking...
+            </h3>
+            <p className="text-text-secondary">
+              Setting up your strategy call
+            </p>
+          </motion.div>
+        </motion.div>
+      )}
+
       {/* Header */}
       <div className="border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -186,11 +213,6 @@ export default function BookingPage() {
                 </div>
               </div>
 
-              {/* Availability note */}
-              <div className="mt-6 flex items-center gap-2 text-sm text-text-muted">
-                <span className="w-2 h-2 rounded-full bg-accent pulse-dot" />
-                <span>Only 2 spots left this week</span>
-              </div>
             </div>
           </motion.div>
 
@@ -346,7 +368,7 @@ export default function BookingPage() {
                         placeholder="https://yourcompany.com"
                       />
                       <p className="text-text-muted text-xs mt-1">
-                        We&apos;ll use this to research your business and create your custom playbook
+                        We&apos;ll use this to learn about your business before the call
                       </p>
                     </div>
 
@@ -383,24 +405,29 @@ export default function BookingPage() {
                         placeholder="E.g., I'm spending too much time on outreach with little results, I don't know how to write cold emails that convert, etc."
                       />
                       <p className="text-text-muted text-xs mt-1">
-                        This helps us tailor your custom playbook and sample emails
+                        This helps us prepare for our conversation
                       </p>
                     </div>
 
-                    <button
+                    <motion.button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full py-4 bg-primary hover:bg-primary-hover text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+                      whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+                      className="w-full py-4 bg-primary hover:bg-primary-hover text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed relative overflow-hidden"
                     >
                       {isSubmitting ? (
-                        "Creating your playbook..."
+                        <span className="flex items-center gap-3">
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>Confirming your booking...</span>
+                        </span>
                       ) : (
-                        <>
-                          Confirm Booking & Get Playbook
+                        <span className="flex items-center gap-2">
+                          Confirm Booking
                           <ArrowRight className="w-4 h-4" />
-                        </>
+                        </span>
                       )}
-                    </button>
+                    </motion.button>
 
                     <p className="text-text-muted text-xs text-center">
                       By scheduling, you agree to our{" "}
