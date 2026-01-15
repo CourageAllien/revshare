@@ -83,22 +83,18 @@ export async function POST(request: NextRequest) {
     );
 
     // Send confirmation email with playbook
-    try {
-      const companyName = research?.companyName || "your company";
-      
-      // Check if email credentials are configured
-      if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
-        console.error("Email credentials not configured. EMAIL_USER:", !!process.env.EMAIL_USER, "EMAIL_APP_PASSWORD:", !!process.env.EMAIL_APP_PASSWORD);
-        throw new Error("Email credentials not configured");
-      }
-      
+    const companyName = research?.companyName || "your company";
+    
+    // Check if email credentials are configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+      console.error("Email credentials not configured. EMAIL_USER:", !!process.env.EMAIL_USER, "EMAIL_APP_PASSWORD:", !!process.env.EMAIL_APP_PASSWORD);
+    } else {
       console.log("Attempting to send confirmation email to:", email);
-      console.log("From:", process.env.EMAIL_USER);
       
-      // Generate PDF playbook if research is available
+      // Try to generate PDF playbook (optional - don't block email if this fails)
       let pdfBuffer: Buffer | undefined;
-      if (research && personalizedHook && valueProposition) {
-        try {
+      try {
+        if (research && personalizedHook && valueProposition) {
           pdfBuffer = await generatePlaybookPDF(
             { ...research, personalizedHook, valueProposition },
             website,
@@ -106,47 +102,51 @@ export async function POST(request: NextRequest) {
             currentChallenge
           );
           console.log("PDF playbook generated successfully");
-        } catch (pdfError) {
-          console.error("Failed to generate PDF:", pdfError);
         }
+      } catch (pdfError) {
+        console.error("Failed to generate PDF (continuing without attachment):", pdfError);
+        pdfBuffer = undefined;
       }
       
-      await transporter.sendMail({
-        from: `"RevShare" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: `You're confirmed! Strategy call on ${formattedDate}`,
-        html: generateConfirmationEmail(name, formattedDate, time, companyName, calendarUrl, personalizedHook),
-        attachments: pdfBuffer ? [
-          {
-            filename: `RevShare_Strategy_${companyName.replace(/\s+/g, '_')}.pdf`,
-            content: pdfBuffer,
-            contentType: 'application/pdf',
-          }
-        ] : undefined,
-      });
+      // Send confirmation email to user
+      try {
+        await transporter.sendMail({
+          from: `"RevShare" <${process.env.EMAIL_USER}>`,
+          to: email,
+          subject: `You're confirmed! Strategy call on ${formattedDate}`,
+          html: generateConfirmationEmail(name, formattedDate, time, companyName, calendarUrl, personalizedHook),
+          attachments: pdfBuffer ? [
+            {
+              filename: `RevShare_Strategy_${companyName.replace(/\s+/g, '_')}.pdf`,
+              content: pdfBuffer,
+              contentType: 'application/pdf',
+            }
+          ] : undefined,
+        });
+        console.log("Confirmation email sent to:", email);
+      } catch (emailError) {
+        console.error("Error sending confirmation email:", emailError);
+      }
 
-      console.log("Confirmation email sent to:", email);
-
-      // Also send notification to your email
-      await transporter.sendMail({
-        from: `"RevShare Bookings" <${process.env.EMAIL_USER}>`,
-        to: process.env.EMAIL_USER,
-        subject: `New Booking: ${name} from ${companyName}`,
-        html: generateAdminNotificationEmail(name, email, website, dealSize, currentChallenge, formattedDate, time, research),
-        attachments: pdfBuffer ? [
-          {
-            filename: `RevShare_Strategy_${companyName.replace(/\s+/g, '_')}.pdf`,
-            content: pdfBuffer,
-            contentType: 'application/pdf',
-          }
-        ] : undefined,
-      });
-
-      console.log("Admin notification email sent successfully");
-    } catch (emailError) {
-      console.error("Error sending confirmation email:", emailError);
-      console.error("Email error details:", JSON.stringify(emailError, Object.getOwnPropertyNames(emailError)));
-      // Don't fail the booking if email fails
+      // Send notification to admin
+      try {
+        await transporter.sendMail({
+          from: `"RevShare Bookings" <${process.env.EMAIL_USER}>`,
+          to: process.env.EMAIL_USER,
+          subject: `New Booking: ${name} from ${companyName}`,
+          html: generateAdminNotificationEmail(name, email, website, dealSize, currentChallenge, formattedDate, time, research),
+          attachments: pdfBuffer ? [
+            {
+              filename: `RevShare_Strategy_${companyName.replace(/\s+/g, '_')}.pdf`,
+              content: pdfBuffer,
+              contentType: 'application/pdf',
+            }
+          ] : undefined,
+        });
+        console.log("Admin notification email sent successfully");
+      } catch (adminEmailError) {
+        console.error("Error sending admin email:", adminEmailError);
+      }
     }
 
     return NextResponse.json({
