@@ -87,15 +87,30 @@ export async function researchCompanyAndGenerateContent(
 
 1. **Company Domain**: ${website}
 2. **Company Avg Deal Size**: ${dealSize}
-3. **Company Biggest Challenge**: "${challenge}"
+3. **Company's Own Sales Challenge**: "${challenge}"
+
+---
+
+## CRITICAL UNDERSTANDING
+
+The "Company's Own Sales Challenge" (${challenge}) is the challenge the CLIENT COMPANY is facing with their own sales/lead generation process. This is NOT a problem their customers face.
+
+- The challenge ("${challenge}") should ONLY be addressed in the "challengeAnalysis" and "challengeSolution" sections
+- The email templates should NOT factor in this challenge at all
+- Email templates are purely about pitching what the client SELLS to their PROSPECTS
+- The challenge has NOTHING to do with the email content
+
+Example: If the challenge is "list building", that means the CLIENT struggles to build prospect lists. The email templates should still focus on pitching the client's service to prospects - NOT about list building.
 
 ---
 
 ## YOUR TASK
 
-Using these inputs, generate a complete cold email playbook. The playbook should be punchy, actionable, and practical. This document is sent TO the client, so use "your" and "you" when addressing them.
+1. Analyze the domain to understand what the company SELLS and who their ideal PROSPECTS are
+2. Address their sales challenge ("${challenge}") in the challenge sections only
+3. Generate email templates that pitch what the client sells - completely independent of their stated challenge
 
-First, analyze the domain to understand what the company sells and who their ideal customers (prospects) are. The email templates should be emails THIS COMPANY can send to THEIR prospects.
+This document is sent TO the client, so use "your" and "you" when addressing them.
 
 Respond in this exact JSON format:
 
@@ -283,12 +298,14 @@ Respond in this exact JSON format:
 
 CRITICAL EMAIL RULES:
 - Each email is FROM the client (${website}) TO their ideal prospect
+- Emails pitch what the CLIENT SELLS - do NOT mention their sales challenge ("${challenge}")
+- The challenge ("${challenge}") is ONLY addressed in challengeAnalysis and challengeSolution sections
 - Under 100 words per email
 - Never start with "I" or the company name
 - 2-4 word subject lines, lowercase
 - Use {{first_name}} and {{company}} as placeholders
 - Single CTA as a question
-- Lead with prospect's pain, not features`;
+- Lead with prospect's pain points that the client's SERVICE solves`;
 
   try {
     const message = await anthropic.messages.create({
