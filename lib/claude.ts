@@ -8,6 +8,8 @@ export interface CompanyResearch {
   companyName: string;
   companyDescription: string;
   whatTheySell: string;
+  challengeAnalysis?: string;
+  challengeSolution?: string;
   targetAudience: {
     painPoints: string[];
     characteristics: string[];
@@ -34,96 +36,106 @@ export async function researchCompanyAndGenerateContent(
   dealSize: string,
   challenge: string
 ): Promise<PersonalizedContent> {
-  const prompt = `You are an expert B2B cold email strategist and copywriter. You're creating an EDUCATIONAL document for a client who has booked a call. This document should teach them how to sell THEIR product/service to THEIR target market.
+  const prompt = `You are creating an EDUCATIONAL strategy document for a B2B company.
 
-The client's details:
-- Company Website: ${website}
-- Average Deal Size: ${dealSize}
-- Their Lead Generation Challenge: ${challenge}
+THE CLIENT WHO BOOKED A CALL:
+- Website: ${website}
+- Average Deal Size: ${dealSize}  
+- Their Stated Challenge: "${challenge}"
 
-IMPORTANT: You are NOT selling to this client. You are TEACHING them how to write cold emails to sell their own product/service. The sample emails should be emails THEY would send to THEIR prospects.
+YOUR TASK:
+1. Figure out what service/product THIS CLIENT sells based on their website
+2. Identify who THEIR ideal customers are (the people they should be selling to)
+3. Write 5 sample cold emails that THIS CLIENT can copy and send to THEIR prospects
 
-Based on the website URL, research what the company does and who their ideal customers are. Then create a document that teaches them how to target their market.
+CRITICAL DISTINCTION - READ CAREFULLY:
+- The CLIENT is the company at ${website}
+- The CLIENT's PROSPECTS are the companies the client wants to sell to
+- The sample emails are FROM the client TO their prospects
+- You are teaching the client how to sell their own service
+
+EXAMPLE TO CLARIFY:
+If the client is "ZortCloud" (a software development agency), their prospects might be "startups needing custom software" or "enterprises with legacy systems."
+The sample emails would be emails ZortCloud sends to those startups/enterprises - NOT emails someone sends to ZortCloud.
 
 Respond in this exact JSON format:
 {
-  "companyName": "inferred company name from website",
-  "companyDescription": "what this company does based on the domain",
-  "whatTheySell": "the specific product or service they offer",
+  "companyName": "name of the client's company",
+  "companyDescription": "what the client's company does",
+  "whatTheySell": "the specific service/product the client offers",
+  "challengeAnalysis": "2-3 sentences analyzing their stated challenge and why it's holding them back",
+  "challengeSolution": "2-3 sentences explaining how cold email outbound can solve this specific challenge",
   "targetAudience": {
-    "painPoints": ["5 specific pain points their ideal customers face that the client's service solves"],
-    "characteristics": ["4 key characteristics of companies that would buy from them"]
+    "painPoints": [
+      "5 pain points that the CLIENT'S PROSPECTS face (not the client)",
+      "These are problems the client's service solves",
+      "Be specific to the client's industry",
+      "Example: If client is a dev agency, prospect pain point might be 'struggling with delayed software projects'",
+      "Another example: 'Spending too much on in-house dev team for features they rarely need'"
+    ],
+    "characteristics": [
+      "4 characteristics of ideal prospects for the client",
+      "Company size, industry, situation, etc.",
+      "Example: 'Series A-C startups with 20-100 employees'",
+      "Example: 'Companies hiring their first technical roles'"
+    ]
   },
-  "technographicSignals": ["4 technical indicators that a company needs their service"],
-  "behavioralIndicators": ["4 actions/behaviors that signal buying intent for their service"],
+  "technographicSignals": [
+    "4 technical indicators that a company needs the client's service",
+    "Example: 'Using no-code tools that are hitting limitations'",
+    "Example: 'Job postings for multiple developer roles'",
+    "Example: 'Outdated tech stack visible on their site'"
+  ],
+  "behavioralIndicators": [
+    "4 behaviors that signal a company is ready to buy from the client",
+    "Example: 'Recently raised funding'",
+    "Example: 'Posted about scaling challenges on LinkedIn'",
+    "Example: 'Hiring for roles the client's service could replace'"
+  ],
   "sampleEmails": [
     {
-      "subject": "2-5 word attention-grabbing subject line",
-      "body": "Email the CLIENT can send to THEIR prospects. Under 100 words. Specific pain point + how client's service solves it + social proof if possible + soft CTA.",
-      "angle": "name of the approach used",
-      "whyItWorks": "brief explanation of why this email is effective"
+      "subject": "short subject line (2-5 words)",
+      "body": "This email is FROM the client TO their prospect. Under 100 words. The email pitches the CLIENT'S service to solve the PROSPECT'S pain point. Use [Prospect Name] and [Prospect Company] as placeholders.",
+      "angle": "Pain Point + Quantified Impact",
+      "whyItWorks": "1 sentence explaining why this angle is effective"
     },
-    ... 4 more emails with different angles
+    {
+      "subject": "subject 2",
+      "body": "Different angle - Research + Observation. Show the client did research on the prospect.",
+      "angle": "Research + Observation", 
+      "whyItWorks": "explanation"
+    },
+    {
+      "subject": "subject 3",
+      "body": "Different angle - mention a case study or result the client achieved for another customer.",
+      "angle": "Social Proof + Case Study",
+      "whyItWorks": "explanation"
+    },
+    {
+      "subject": "subject 4",
+      "body": "Different angle - list specific problems you noticed the prospect might have.",
+      "angle": "Deep Research Bullet Points",
+      "whyItWorks": "explanation"
+    },
+    {
+      "subject": "subject 5",
+      "body": "Different angle - short and direct, 2-3 sentences max.",
+      "angle": "Short & Direct",
+      "whyItWorks": "explanation"
+    }
   ],
-  "personalizedHook": "A compelling one-liner about their specific challenge we noticed",
-  "valueProposition": "How RevShare's outbound partnership model specifically addresses their stated challenge"
+  "personalizedHook": "A one-liner acknowledging their stated challenge: '${challenge}'",
+  "valueProposition": "How RevShare's outbound partnership can specifically help with their challenge"
 }
 
-CRITICAL EMAIL GUIDELINES - Study these examples and write emails of similar quality:
-
-EXAMPLE 1 - Pain Point Lead:
-Subject: 40% qualified leads lost
-That's probably the last thing you want to hear, Sarah.
-But, for TechCorp it happens way too often. And that's usually as a result of disconnected sales and marketing systems.
-We make it easy for companies in such situations to increase lead conversion by 65%. TechFlow saw similar issues and increased qualified leads by 73% within 60 days.
-Think this can help?
-
-EXAMPLE 2 - Research + Observation:
-Hey Sarah,
-Your team spends half their day researching and finding AI companies similar to Discord instead of focusing on closing deals and building strategic partnerships.
-We help them focus on selling while our AI-automated workflows handle the prospect research and build lists based on signals that show companies are struggling with LLM implementation at scale.
-Mind if I share a sample well-researched prospect list?
-
-EXAMPLE 3 - Social Proof Angle:
-Hey Sarah – Looks like you work with AI infrastructure platforms. Saw that Discord is a client.
-Usually this suggests you'll be open to working with other AI product companies building similar applications.
-Companies without large GTM teams plug our AI-automated workflows to handle research, outreach and scale pipeline generation. 100 personalized conversations = qualified meetings on autopilot.
-Think this can help you get clients similar to Discord?
-
-EXAMPLE 4 - Deep Research:
-Sarah – from my research these are some of the issues your target market faces that Adaline helps with:
-• Difficulty managing prompts and evaluating LLM performance at scale
-• Challenges bridging the gap between technical and nontechnical teams
-• Struggles with maintaining reliability and uptime in production AI workflows
-We have AI-automated workflows that can identify companies struggling with these exact issues and message them on your behalf with relevant case studies.
-Is this a bad idea or am I way off mark here?
-
-EXAMPLE 5 - Show Competence:
-Sarah – I sent an email a while back that probably didn't do a good enough job showing you how we could help.
-Our system combines AI-powered research and automation so your team can see qualified accounts in front of them instead of manually researching.
-For example:
-• Your platform processes 5B+ tokens per day with 99.998% uptime
-• Discord and Epsilon are listed as key clients
-• You're targeting product and engineering teams
-Besides insights like this, we also monitor for news, job positions, tech stack changes.
-Wanna make it happen?
-
-KEY PRINCIPLES FOR THE SAMPLE EMAILS:
-1. Each email targets the CLIENT'S ideal customer (not the client themselves)
-2. Lead with research/relevance - show you understand the prospect's world
-3. Quantify pain points when possible (40% lost, 3 hours per day, etc.)
-4. Include social proof with specific results (73% increase, 60 days, etc.)
-5. Use soft CTAs: "Think this can help?", "Open to hearing more?", "Mind if I share?"
-6. Conversational tone - like a helpful peer, not a salesperson
-7. Keep under 100 words - respect their time
-8. Position the client as a partner who "gets it", not a vendor
-
-The 5 email angles to use:
-1. Pain Point + Quantified Impact (e.g., "40% leads lost")
-2. Research + Observation (show you did homework on the prospect)  
-3. Social Proof + Similar Company (leverage existing client success)
-4. Deep Research Bullet Points (list specific pain points you identified)
-5. Competence Demonstration (show specific insights you found about them)`;
+EMAIL WRITING PRINCIPLES:
+- Each email is FROM ${website} TO their ideal prospect
+- Lead with prospect's pain, not the client's service features
+- Quantify problems: "3 months delayed", "40% over budget", "5 hours/week wasted"
+- Use soft CTAs: "Worth a conversation?", "Open to hearing more?", "Bad idea?"
+- Conversational tone, not salesy
+- Under 100 words per email
+- Use [Prospect Name] and [Prospect Company] as placeholders`;
 
   try {
     const message = await anthropic.messages.create({
@@ -157,6 +169,9 @@ The 5 email angles to use:
       research: {
         companyName: research.companyName,
         companyDescription: research.companyDescription,
+        whatTheySell: research.whatTheySell,
+        challengeAnalysis: research.challengeAnalysis,
+        challengeSolution: research.challengeSolution,
         targetAudience: research.targetAudience,
         technographicSignals: research.technographicSignals,
         behavioralIndicators: research.behavioralIndicators,
@@ -362,8 +377,17 @@ function generatePlaybookHTML(
   </div>
 
   <div class="section">
-    <div class="intro-box">
-      <p>This guide breaks down exactly who your best prospects are, what signals indicate they're ready to buy, and gives you 5 ready-to-use cold email templates based on proven frameworks. Use these to start conversations with decision-makers who need what you offer.</p>
+    <h2>🔥 Your Challenge</h2>
+    <div class="overview-box" style="background: #fef2f2; border-left-color: #ef4444;">
+      <p style="color: #991b1b; font-weight: 600; margin-bottom: 12px;">"${challenge}"</p>
+      <p style="color: #7f1d1d;">${research.challengeAnalysis || "This is a common challenge that prevents many B2B companies from scaling predictably."}</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>✅ The Solution: Targeted Cold Outreach</h2>
+    <div class="overview-box" style="background: #f0fdf4; border-left-color: #22c55e;">
+      <p style="color: #166534;">${research.challengeSolution || "Cold email outbound, done right, puts you in front of decision-makers who need your service — before they even know they're looking. Below is exactly how to do it."}</p>
     </div>
   </div>
 

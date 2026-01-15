@@ -110,17 +110,31 @@ export async function generatePlaybookPDF(
   page.drawText("How to Reach Your Ideal Clients", { x: margin, y, size: 12, font: helvetica, color: gray });
   y -= 30;
   
-  // Intro text
-  addText("This guide breaks down exactly who your best prospects are, what signals indicate they're ready to buy, and gives you 5 ready-to-use cold email templates. Use these to start conversations with decision-makers who need what you offer.", 10, helvetica, gray);
-  y -= 25;
+  // Your Challenge Section
+  const red = rgb(0.6, 0.11, 0.11);
+  const challengeAnalysis = (research as { challengeAnalysis?: string }).challengeAnalysis || "This is a common challenge that prevents many B2B companies from scaling predictably.";
+  const challengeSolution = (research as { challengeSolution?: string }).challengeSolution || "Cold email outbound, done right, puts you in front of decision-makers who need your service.";
+  
+  addSection("Your Challenge");
+  page.drawText(`"${challenge.substring(0, 80)}${challenge.length > 80 ? '...' : ''}"`, { x: margin, y, size: 10, font: helveticaBold, color: red });
+  y -= 16;
+  addText(challengeAnalysis, 9, helvetica, gray);
+  y -= 15;
+  
+  // The Solution Section
+  const green = rgb(0.086, 0.529, 0.243);
+  addSection("The Solution: Targeted Cold Outreach");
+  addText(challengeSolution, 9, helvetica, green);
+  y -= 20;
   
   // Overview Box
   const whatTheySell = (research as { whatTheySell?: string }).whatTheySell || research.companyDescription;
+  addSection("Your Business Snapshot");
   page.drawRectangle({
     x: margin,
-    y: y - 65,
+    y: y - 55,
     width: pageWidth - margin * 2,
-    height: 70,
+    height: 60,
     color: rgb(0.96, 0.97, 0.98),
     borderColor: rgb(0.9, 0.9, 0.9),
     borderWidth: 1,
@@ -170,8 +184,6 @@ export async function generatePlaybookPDF(
   addSection("5 Cold Email Templates");
   addText("These emails are ready for you to customize and send. Each uses a different proven angle:", 9, helvetica, gray);
   y -= 10;
-  
-  const green = rgb(0.086, 0.529, 0.243);
   
   for (let i = 0; i < Math.min(research.sampleEmails.length, 5); i++) {
     const email = research.sampleEmails[i];
