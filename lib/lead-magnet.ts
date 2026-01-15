@@ -217,9 +217,6 @@ export function generateLeadMagnetEmailHTML(content: LeadMagnetContent): string 
                 <h1 style="color: #ffffff; font-size: 26px; margin: 0 0 8px 0; line-height: 1.3;">
                   ${content.title}
                 </h1>
-                <p style="color: #3b82f6; font-size: 16px; margin: 0;">
-                  Personalized for ${content.companyName}
-                </p>
               </div>
               
               <!-- Personalized Intro -->
@@ -237,7 +234,7 @@ export function generateLeadMagnetEmailHTML(content: LeadMagnetContent): string 
                   ${section.content}
                 </p>
                 <p style="color: #3b82f6; font-size: 14px; line-height: 1.6; margin: 0; font-style: italic;">
-                  💡 For ${content.companyName}: ${section.personalizedTip}
+                  💡 ${section.personalizedTip}
                 </p>
               </div>
               `).join('')}
@@ -260,10 +257,7 @@ export function generateLeadMagnetEmailHTML(content: LeadMagnetContent): string 
           <!-- Footer -->
           <tr>
             <td style="padding-top: 30px; text-align: center;">
-              <p style="color: #71717a; font-size: 14px; margin: 0;">
-                This guide was personalized for ${content.companyName} using AI.
-              </p>
-              <p style="color: #52525b; font-size: 12px; margin: 16px 0 0 0;">
+              <p style="color: #52525b; font-size: 12px; margin: 0;">
                 © ${new Date().getFullYear()} RevShare. All rights reserved.
               </p>
             </td>

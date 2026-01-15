@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     await transporter.sendMail({
       from: `"RevShare" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: `${content.emoji} ${content.title} - Personalized for ${content.companyName}`,
+      subject: `${content.emoji} ${content.title}`,
       html: emailHtml,
     });
 
