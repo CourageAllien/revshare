@@ -4,6 +4,7 @@ import { format, parseISO } from "date-fns";
 import { addBooking, getBookings, Booking } from "@/lib/storage";
 import { researchCompanyAndGenerateContent } from "@/lib/claude";
 import { ZOOM_MEETING, generateGoogleCalendarUrl } from "@/lib/constants";
+import { generatePlaybookPDF } from "@/lib/pdf-generator";
 
 // Email configuration - uses environment variables
 const transporter = nodemailer.createTransport({
@@ -94,16 +95,32 @@ export async function POST(request: NextRequest) {
       console.log("Attempting to send confirmation email to:", email);
       console.log("From:", process.env.EMAIL_USER);
       
+      // Generate PDF playbook if research is available
+      let pdfBuffer: Buffer | undefined;
+      if (research && personalizedHook && valueProposition) {
+        try {
+          pdfBuffer = await generatePlaybookPDF(
+            { ...research, personalizedHook, valueProposition },
+            website,
+            dealSize,
+            currentChallenge
+          );
+          console.log("PDF playbook generated successfully");
+        } catch (pdfError) {
+          console.error("Failed to generate PDF:", pdfError);
+        }
+      }
+      
       await transporter.sendMail({
         from: `"RevShare" <${process.env.EMAIL_USER}>`,
         to: email,
-        subject: `You're confirmed! Strategy call on ${formattedDate} + Your Custom Playbook`,
+        subject: `You're confirmed! Strategy call on ${formattedDate}`,
         html: generateConfirmationEmail(name, formattedDate, time, companyName, calendarUrl, personalizedHook),
-        attachments: playbook ? [
+        attachments: pdfBuffer ? [
           {
-            filename: `RevShare_Playbook_${companyName.replace(/\s+/g, '_')}.html`,
-            content: playbook,
-            contentType: 'text/html',
+            filename: `RevShare_Strategy_${companyName.replace(/\s+/g, '_')}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf',
           }
         ] : undefined,
       });
@@ -116,11 +133,11 @@ export async function POST(request: NextRequest) {
         to: process.env.EMAIL_USER,
         subject: `New Booking: ${name} from ${companyName}`,
         html: generateAdminNotificationEmail(name, email, website, dealSize, currentChallenge, formattedDate, time, research),
-        attachments: playbook ? [
+        attachments: pdfBuffer ? [
           {
-            filename: `RevShare_Playbook_${companyName.replace(/\s+/g, '_')}.html`,
-            content: playbook,
-            contentType: 'text/html',
+            filename: `RevShare_Strategy_${companyName.replace(/\s+/g, '_')}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf',
           }
         ] : undefined,
       });
@@ -279,11 +296,11 @@ function generateConfirmationEmail(
               
               <!-- Playbook Callout -->
               <div style="background-color: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                <h3 style="color: #10b981; font-size: 16px; margin: 0 0 8px 0;">🎁 Your Custom Playbook is Attached!</h3>
+                <h3 style="color: #10b981; font-size: 16px; margin: 0 0 8px 0;">🎁 Custom Strategy Doc Attached</h3>
                 <p style="color: #a1a1aa; font-size: 14px; margin: 0; line-height: 1.6;">
-                  I've prepared a personalized outbound playbook for ${companyName} including target audience insights, 
-                  technographic signals, and <strong style="color: #ffffff;">5 sample cold emails</strong> tailored to your business. 
-                  Open the attached HTML file to review it before our call.
+                  I've put together some insights for ${companyName} including target audience analysis 
+                  and <strong style="color: #ffffff;">5 sample cold emails</strong> tailored to your business. 
+                  Check the attached doc before our call.
                 </p>
               </div>
               
